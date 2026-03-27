@@ -48,16 +48,184 @@ class Projeto:
 		self.numero_vagas = numero_vagas
 		self.criador = criador  # pode ser Mentor ou Aluno
 		self.participantes = []  # lista de alunos participantes
+		self.status = "Aberto"  # status do projeto: "Aberto" ou "Fechado"
+		self.data_criacao = None  # data de criação do projeto
+	
+	def adicionar_participante(self, aluno):
+		"""Adiciona um aluno como participante do projeto"""
+		if aluno not in self.participantes:
+			self.participantes.append(aluno)
+			return True
+		return False
+	
+	def remover_participante(self, aluno):
+		"""Remove um aluno da lista de participantes"""
+		if aluno in self.participantes:
+			self.participantes.remove(aluno)
+			return True
+		return False
+	
+	def vagas_disponiveis(self):
+		"""Retorna o número de vagas disponíveis"""
+		return self.numero_vagas - len(self.participantes)
+	
+	def esta_cheio(self):
+		"""Verifica se o projeto está com todas as vagas preenchidas"""
+		return self.vagas_disponiveis() <= 0
+	
+	def fechar_projeto(self):
+		"""Fecha o projeto para novas inscrições"""
+		self.status = "Fechado"
+	
+	def abrir_projeto(self):
+		"""Reabre o projeto para inscrições"""
+		self.status = "Aberto"
 	
 	def __repr__(self):
 		tipo_criador = "Mentor" if isinstance(self.criador, Mentor) else "Aluno"
 		return f"Projeto(titulo={self.titulo}, resumo={self.resumo_tema[:50]}..., vagas={self.numero_vagas}, criador={tipo_criador} {self.criador.nome})"
 
 
+# Classe para gerenciar o Mural de Projetos - RF04
+class MuralDeProjetos:
+	def __init__(self):
+		self.projetos_lista = []  # referência à lista de projetos global
+	
+	def definir_projetos(self, projetos_lista):
+		"""Define a lista de projetos a ser gerenciada"""
+		self.projetos_lista = projetos_lista
+	
+	def obter_projetos_abertos(self):
+		"""Retorna apenas os projetos com status 'Aberto'"""
+		return [p for p in self.projetos_lista if p.status == "Aberto"]
+	
+	def obter_projetos_com_vagas(self):
+		"""Retorna projetos que ainda possuem vagas disponíveis"""
+		return [p for p in self.projetos_lista if p.vagas_disponiveis() > 0 and p.status == "Aberto"]
+	
+	def filtrar_por_tema(self, palavra_chave):
+		"""Filtra projetos por palavra-chave no título ou resumo"""
+		palavra_chave = palavra_chave.lower()
+		return [p for p in self.obter_projetos_abertos() 
+				if palavra_chave in p.titulo.lower() or palavra_chave in p.resumo_tema.lower()]
+	
+	def filtrar_por_criador_tipo(self, tipo):
+		"""Filtra projetos por tipo de criador ('Mentor' ou 'Aluno')"""
+		if tipo.lower() == 'mentor':
+			return [p for p in self.obter_projetos_abertos() if isinstance(p.criador, Mentor)]
+		elif tipo.lower() == 'aluno':
+			return [p for p in self.obter_projetos_abertos() if isinstance(p.criador, Aluno)]
+		return self.obter_projetos_abertos()
+	
+	def contar_projetos_abertos(self):
+		"""Retorna a quantidade de projetos abertos"""
+		return len(self.obter_projetos_abertos())
+	
+	def contar_vagas_totais_disponiveis(self):
+		"""Retorna o total de vagas disponíveis em todos os projetos abertos"""
+		return sum(p.vagas_disponiveis() for p in self.obter_projetos_abertos())
+	
+	def exibir_mural_resumido(self):
+		"""Exibe o mural de projetos de forma resumida e rápida"""
+		projetos_abertos = self.obter_projetos_abertos()
+		
+		if not projetos_abertos:
+			print("\n" + "="*70)
+			print("MURAL DE PROJETOS - NENHUM PROJETO ABERTO")
+			print("="*70)
+			print("Não há projetos de IC abertos no momento.")
+			return
+		
+		print("\n" + "="*70)
+		print("MURAL DE PROJETOS - RF04")
+		print("="*70)
+		print(f"Total de projetos abertos: {len(projetos_abertos)}")
+		print(f"Total de vagas disponíveis: {self.contar_vagas_totais_disponiveis()}")
+		print("="*70)
+		
+		for idx, projeto in enumerate(projetos_abertos, 1):
+			tipo_criador = "👨‍🏫 Mentor" if isinstance(projeto.criador, Mentor) else "👨‍🎓 Aluno"
+			status_vagas = f"({projeto.vagas_disponiveis()} vagas disponíveis)" if projeto.vagas_disponiveis() > 0 else "(VAGAS CHEIAS)"
+			
+			print(f"\n[{idx}] {projeto.titulo}")
+			print(f"    📌 Criador: {projeto.criador.nome} ({tipo_criador})")
+			print(f"    📝 Tema: {projeto.resumo_tema}")
+			print(f"    👥 Vagas: {projeto.numero_vagas} total {status_vagas}")
+			print(f"    ➕ Participantes: {len(projeto.participantes)}")
+	
+	def exibir_mural_detalhado(self):
+		"""Exibe o mural de projetos com informações detalhadas"""
+		projetos_abertos = self.obter_projetos_abertos()
+		
+		if not projetos_abertos:
+			print("\n" + "="*70)
+			print("MURAL DE PROJETOS - NENHUM PROJETO ABERTO")
+			print("="*70)
+			return
+		
+		print("\n" + "="*70)
+		print("MURAL DE PROJETOS - VISUALIZAÇÃO DETALHADA - RF04")
+		print("="*70)
+		
+		for idx, projeto in enumerate(projetos_abertos, 1):
+			tipo_criador = "Mentor" if isinstance(projeto.criador, Mentor) else "Aluno"
+			print(f"\n{'─'*70}")
+			print(f"║ PROJETO #{idx} ║")
+			print(f"{'─'*70}")
+			print(f"Título:          {projeto.titulo}")
+			print(f"Tema:            {projeto.resumo_tema}")
+			print(f"Criador:         {projeto.criador.nome}")
+			print(f"Tipo Criador:    {tipo_criador}")
+			
+			if isinstance(projeto.criador, Mentor):
+				print(f"Departamento:    {projeto.criador.departamento}")
+				print(f"Disponibilidade: {projeto.criador.disponibilidade}")
+				if projeto.criador.email:
+					print(f"Email Contato:   {projeto.criador.email}")
+			else:
+				print(f"Curso Aluno:     {projeto.criador.curso}")
+			
+			print(f"Vagas Totais:    {projeto.numero_vagas}")
+			print(f"Vagas Ocupadas:  {len(projeto.participantes)}")
+			print(f"Vagas Livres:    {projeto.vagas_disponiveis()}")
+			print(f"Status:          {projeto.status}")
+			
+			if projeto.participantes:
+				print(f"Participantes Atuais:")
+				for p in projeto.participantes:
+					print(f"  • {p.nome} ({p.curso})")
+		
+		print(f"\n{'='*70}")
+	
+	def exibir_mural_com_filtro(self, palavra_chave):
+		"""Exibe o mural filtrado por palavra-chave"""
+		projetos_filtrados = self.filtrar_por_tema(palavra_chave)
+		
+		if not projetos_filtrados:
+			print(f"\nNenhum projeto encontrado com '{palavra_chave}'")
+			return
+		
+		print(f"\n{'='*70}")
+		print(f"RESULTADOS DA BUSCA - '{palavra_chave}'")
+		print(f"Total encontrado: {len(projetos_filtrados)} projeto(s)")
+		print(f"{'='*70}")
+		
+		for idx, projeto in enumerate(projetos_filtrados, 1):
+			tipo_criador = "👨‍🏫 Mentor" if isinstance(projeto.criador, Mentor) else "👨‍🎓 Aluno"
+			print(f"\n[{idx}] {projeto.titulo}")
+			print(f"    📌 Criador: {projeto.criador.nome} ({tipo_criador})")
+			print(f"    📝 Tema: {projeto.resumo_tema}")
+			print(f"    👥 Vagas disponíveis: {projeto.vagas_disponiveis()} de {projeto.numero_vagas}")
+
+
 # Listas para armazenar os usuários cadastrados
 alunos = []
 mentores = []
 projetos = []
+
+# Instância do Mural de Projetos - RF04
+mural = MuralDeProjetos()
+mural.definir_projetos(projetos)
 
 
 # Função para cadastrar um novo aluno
@@ -228,6 +396,95 @@ def listar_projetos():
 		print(f"   Participantes: {len(projeto.participantes)}")
 
 
+# Função para exibir o Mural de Projetos - RF04
+def exibir_mural_projetos():
+	"""Exibe o mural de projetos com opções de visualização"""
+	while True:
+		print("\n" + "="*70)
+		print("MURAL DE PROJETOS - RF04")
+		print("="*70)
+		print("1. Visualizar todos os projetos abertos (Resumido)")
+		print("2. Visualizar detalhes completos dos projetos")
+		print("3. Buscar projetos por tema/palavra-chave")
+		print("4. Filtrar projetos por tipo de criador (Mentor/Aluno)")
+		print("5. Estatísticas do mural")
+		print("6. Voltar ao menu principal")
+		print("="*70)
+		
+		opcao = input("Escolha uma opção (1-6): ").strip()
+		
+		if opcao == '1':
+			mural.exibir_mural_resumido()
+		
+		elif opcao == '2':
+			mural.exibir_mural_detalhado()
+		
+		elif opcao == '3':
+			palavra_chave = input("\nDigite a palavra-chave para buscar: ").strip()
+			if palavra_chave:
+				mural.exibir_mural_com_filtro(palavra_chave)
+			else:
+				print("Palavra-chave vazia. Tente novamente.")
+		
+		elif opcao == '4':
+			print("\nFiltrar por tipo de criador:")
+			print("1. Projetos de Mentores")
+			print("2. Projetos de Alunos")
+			tipo_escolha = input("Escolha (1/2): ").strip()
+			
+			if tipo_escolha == '1':
+				projetos_filtrados = mural.filtrar_por_criador_tipo('Mentor')
+				tipo_nome = "Mentores"
+			elif tipo_escolha == '2':
+				projetos_filtrados = mural.filtrar_por_criador_tipo('Aluno')
+				tipo_nome = "Alunos"
+			else:
+				print("Opção inválida.")
+				continue
+			
+			if not projetos_filtrados:
+				print(f"\nNenhum projeto de {tipo_nome} disponível.")
+			else:
+				print(f"\n{'='*70}")
+				print(f"PROJETOS DE {tipo_nome.upper()}")
+				print(f"Total: {len(projetos_filtrados)} projeto(s)")
+				print(f"{'='*70}")
+				
+				for idx, projeto in enumerate(projetos_filtrados, 1):
+					print(f"\n[{idx}] {projeto.titulo}")
+					print(f"    Criador: {projeto.criador.nome}")
+					print(f"    Tema: {projeto.resumo_tema}")
+					print(f"    Vagas disponíveis: {projeto.vagas_disponiveis()} de {projeto.numero_vagas}")
+		
+		elif opcao == '5':
+			projetos_abertos = mural.obter_projetos_abertos()
+			projetos_com_vagas = mural.obter_projetos_com_vagas()
+			
+			print("\n" + "="*70)
+			print("ESTATÍSTICAS DO MURAL DE PROJETOS")
+			print("="*70)
+			print(f"Total de projetos publicados: {len(projetos)}")
+			print(f"Total de projetos abertos:    {len(projetos_abertos)}")
+			print(f"Projetos com vagas livres:    {len(projetos_com_vagas)}")
+			print(f"Total de vagas disponíveis:   {mural.contar_vagas_totais_disponiveis()}")
+			
+			if projetos:
+				projeto_mais_concorrido = max(projetos, key=lambda p: len(p.participantes))
+				print(f"\nProjeto mais concorrido:       '{projeto_mais_concorrido.titulo}' ({len(projeto_mais_concorrido.participantes)} participantes)")
+			
+			if projetos_abertos:
+				projeto_vazio = max(projetos_abertos, key=lambda p: p.vagas_disponiveis())
+				print(f"Projeto com mais vagas:        '{projeto_vazio.titulo}' ({projeto_vazio.vagas_disponiveis()} vagas livres)")
+			
+			print("="*70)
+		
+		elif opcao == '6':
+			break
+		
+		else:
+			print("Opção inválida. Tente novamente.")
+
+
 # Função para visualizar detalhes de um mentor
 def visualizar_mentor():
 	listar_mentores()
@@ -265,7 +522,7 @@ def menu_principal():
 		print("4. Listar Mentores")
 		print("5. Visualizar Detalhes de Mentor")
 		print("6. Publicar Projeto - RF03")
-		print("7. Listar Projetos")
+		print("7. Mural de Projetos - RF04")
 		print("8. Sair")
 		print("="*50)
 		
@@ -284,7 +541,7 @@ def menu_principal():
 		elif opcao == '6':
 			publicar_projeto()
 		elif opcao == '7':
-			listar_projetos()
+			exibir_mural_projetos()
 		elif opcao == '8':
 			print("\nAté logo! Sistema finalizado.")
 			break
