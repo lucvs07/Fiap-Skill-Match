@@ -218,6 +218,88 @@ class MuralDeProjetos:
 			print(f"    👥 Vagas disponíveis: {projeto.vagas_disponiveis()} de {projeto.numero_vagas}")
 
 
+# Classe para gerenciar o Diretório de Mentores - RF05
+class DiretorioMentores:
+	def __init__(self):
+		self.mentores_lista = []
+
+	def definir_mentores(self, mentores_lista):
+		"""Define a lista de mentores a ser gerenciada"""
+		self.mentores_lista = mentores_lista
+
+	def obter_mentores_disponiveis(self):
+		"""Retorna mentores com disponibilidade para orientar"""
+		return [m for m in self.mentores_lista if m.disponibilidade in ("Alta", "Média")]
+
+	def filtrar_por_especialidade(self, palavra_chave):
+		"""Filtra mentores por especialidade técnica"""
+		palavra_chave = palavra_chave.lower()
+		return [
+			mentor for mentor in self.obter_mentores_disponiveis()
+			if any(palavra_chave in esp.lower() for esp in mentor.especialidades)
+		]
+
+	def exibir_diretorio_resumido(self):
+		"""Exibe mentores disponíveis com especialidades e contato"""
+		mentores_disponiveis = self.obter_mentores_disponiveis()
+
+		print("\n" + "=" * 70)
+		print("DIRETORIO DE MENTORES - RF05")
+		print("=" * 70)
+
+		if not mentores_disponiveis:
+			print("Nenhum mentor disponivel para novas orientacoes no momento.")
+			return
+
+		print(f"Mentores disponiveis: {len(mentores_disponiveis)}")
+		print("=" * 70)
+
+		for idx, mentor in enumerate(mentores_disponiveis, 1):
+			especialidades = ", ".join(mentor.especialidades) if mentor.especialidades else "Nao informadas"
+			email = mentor.email if mentor.email else "Nao informado"
+			print(f"\n[{idx}] {mentor.nome}")
+			print(f"    Departamento: {mentor.departamento}")
+			print(f"    Disponibilidade: {mentor.disponibilidade}")
+			print(f"    Especialidades: {especialidades}")
+			print(f"    Contato: {email}")
+
+	def exibir_contato_mentor(self):
+		"""Mostra detalhes de contato e especialidades de um mentor disponível"""
+		mentores_disponiveis = self.obter_mentores_disponiveis()
+		if not mentores_disponiveis:
+			print("\nNenhum mentor disponivel para contato no momento.")
+			return
+
+		self.exibir_diretorio_resumido()
+		try:
+			opcao = int(input("\nDigite o numero do mentor para ver contato (0 para voltar): ").strip())
+		except ValueError:
+			print("Entrada invalida.")
+			return
+
+		if opcao == 0:
+			return
+
+		idx = opcao - 1
+		if not (0 <= idx < len(mentores_disponiveis)):
+			print("Numero invalido.")
+			return
+
+		mentor = mentores_disponiveis[idx]
+		especialidades = ", ".join(mentor.especialidades) if mentor.especialidades else "Nao informadas"
+		linhas = ", ".join(mentor.linhas_pesquisa) if mentor.linhas_pesquisa else "Nao informadas"
+
+		print("\n" + "=" * 70)
+		print(f"DETALHES DO MENTOR: {mentor.nome}")
+		print("=" * 70)
+		print(f"Departamento: {mentor.departamento}")
+		print(f"Linhas de pesquisa: {linhas}")
+		print(f"Especialidades tecnicas: {especialidades}")
+		print(f"Disponibilidade: {mentor.disponibilidade}")
+		print(f"Email para contato: {mentor.email if mentor.email else 'Nao informado'}")
+		print("=" * 70)
+
+
 # Listas para armazenar os usuários cadastrados
 alunos = []
 mentores = []
@@ -226,6 +308,10 @@ projetos = []
 # Instância do Mural de Projetos - RF04
 mural = MuralDeProjetos()
 mural.definir_projetos(projetos)
+
+# Instância do Diretório de Mentores - RF05
+diretorio_mentores = DiretorioMentores()
+diretorio_mentores.definir_mentores(mentores)
 
 
 # Função para cadastrar um novo aluno
@@ -510,6 +596,56 @@ def visualizar_mentor():
 			print("Opção inválida.")
 
 
+# Função para exibir o Diretório de Mentores - RF05
+def exibir_diretorio_mentores():
+	"""Exibe o diretório de mentores disponíveis para contato"""
+	while True:
+		print("\n" + "=" * 70)
+		print("DIRETORIO DE MENTORES - RF05")
+		print("=" * 70)
+		print("1. Listar mentores disponiveis")
+		print("2. Buscar mentores por especialidade")
+		print("3. Ver detalhes de contato de um mentor")
+		print("4. Voltar ao menu principal")
+		print("=" * 70)
+
+		opcao = input("Escolha uma opcao (1-4): ").strip()
+
+		if opcao == '1':
+			diretorio_mentores.exibir_diretorio_resumido()
+
+		elif opcao == '2':
+			palavra_chave = input("\nDigite a especialidade para buscar: ").strip()
+			if not palavra_chave:
+				print("Especialidade vazia. Tente novamente.")
+				continue
+
+			mentores_filtrados = diretorio_mentores.filtrar_por_especialidade(palavra_chave)
+			print("\n" + "=" * 70)
+			print(f"RESULTADOS DA BUSCA - ESPECIALIDADE: {palavra_chave}")
+			print("=" * 70)
+			if not mentores_filtrados:
+				print("Nenhum mentor disponivel com essa especialidade.")
+			else:
+				for idx, mentor in enumerate(mentores_filtrados, 1):
+					especialidades = ", ".join(mentor.especialidades) if mentor.especialidades else "Nao informadas"
+					email = mentor.email if mentor.email else "Nao informado"
+					print(f"\n[{idx}] {mentor.nome}")
+					print(f"    Departamento: {mentor.departamento}")
+					print(f"    Disponibilidade: {mentor.disponibilidade}")
+					print(f"    Especialidades: {especialidades}")
+					print(f"    Contato: {email}")
+
+		elif opcao == '3':
+			diretorio_mentores.exibir_contato_mentor()
+
+		elif opcao == '4':
+			break
+
+		else:
+			print("Opcao invalida. Tente novamente.")
+
+
 # Menu principal
 def menu_principal():
 	while True:
@@ -523,10 +659,11 @@ def menu_principal():
 		print("5. Visualizar Detalhes de Mentor")
 		print("6. Publicar Projeto - RF03")
 		print("7. Mural de Projetos - RF04")
-		print("8. Sair")
+		print("8. Diretorio de Mentores - RF05")
+		print("9. Sair")
 		print("="*50)
 		
-		opcao = input("Escolha uma opção (1-8): ").strip()
+		opcao = input("Escolha uma opcao (1-9): ").strip()
 		
 		if opcao == '1':
 			cadastrar_aluno()
@@ -543,10 +680,12 @@ def menu_principal():
 		elif opcao == '7':
 			exibir_mural_projetos()
 		elif opcao == '8':
+			exibir_diretorio_mentores()
+		elif opcao == '9':
 			print("\nAté logo! Sistema finalizado.")
 			break
 		else:
-			print("Opção inválida. Tente novamente.")
+			print("Opcao invalida. Tente novamente.")
 
 
 # Exemplo de uso
