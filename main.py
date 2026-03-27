@@ -40,9 +40,24 @@ class Mentor:
 		return f"Mentor(nome={self.nome}, departamento={self.departamento}, linhas_pesquisa={self.linhas_pesquisa}, disponibilidade={self.disponibilidade})"
 
 
+# Classe para representar um projeto - RF03
+class Projeto:
+	def __init__(self, titulo, resumo_tema, numero_vagas, criador):
+		self.titulo = titulo
+		self.resumo_tema = resumo_tema
+		self.numero_vagas = numero_vagas
+		self.criador = criador  # pode ser Mentor ou Aluno
+		self.participantes = []  # lista de alunos participantes
+	
+	def __repr__(self):
+		tipo_criador = "Mentor" if isinstance(self.criador, Mentor) else "Aluno"
+		return f"Projeto(titulo={self.titulo}, resumo={self.resumo_tema[:50]}..., vagas={self.numero_vagas}, criador={tipo_criador} {self.criador.nome})"
+
+
 # Listas para armazenar os usuários cadastrados
 alunos = []
 mentores = []
+projetos = []
 
 
 # Função para cadastrar um novo aluno
@@ -91,6 +106,79 @@ def cadastrar_mentor():
 	print(f"  Linhas de pesquisa: {', '.join(mentor.linhas_pesquisa)}")
 
 
+# Função para publicar uma oportunidade de IC (criar card de projeto) - RF03
+def publicar_projeto():
+	print("\n=== Publicação de Oportunidade de IC - RF03 ===")
+	
+	# Escolher o tipo de criador
+	print("Quem está criando o projeto?")
+	print("1. Mentor (Professor)")
+	print("2. Aluno Proponente")
+	tipo_criador = input("Escolha (1/2): ").strip()
+	
+	criador = None
+	if tipo_criador == '1':
+		if not mentores:
+			print("Nenhum mentor cadastrado. Cadastre um mentor primeiro.")
+			return
+		listar_mentores()
+		try:
+			idx = int(input("Digite o número do mentor criador: ")) - 1
+			if 0 <= idx < len(mentores):
+				criador = mentores[idx]
+			else:
+				print("Número inválido.")
+				return
+		except ValueError:
+			print("Entrada inválida.")
+			return
+	elif tipo_criador == '2':
+		if not alunos:
+			print("Nenhum aluno cadastrado. Cadastre um aluno primeiro.")
+			return
+		listar_alunos()
+		try:
+			idx = int(input("Digite o número do aluno proponente: ")) - 1
+			if 0 <= idx < len(alunos):
+				criador = alunos[idx]
+			else:
+				print("Número inválido.")
+				return
+		except ValueError:
+			print("Entrada inválida.")
+			return
+	else:
+		print("Opção inválida.")
+		return
+	
+	# Coletar informações do projeto
+	titulo = input("Título do projeto: ").strip()
+	if not titulo:
+		print("Título é obrigatório.")
+		return
+	
+	resumo_tema = input("Resumo do tema: ").strip()
+	if not resumo_tema:
+		print("Resumo é obrigatório.")
+		return
+	
+	try:
+		numero_vagas = int(input("Número de vagas para o grupo: ").strip())
+		if numero_vagas <= 0:
+			print("Número de vagas deve ser positivo.")
+			return
+	except ValueError:
+		print("Número de vagas deve ser um inteiro.")
+		return
+	
+	# Criar o projeto
+	projeto = Projeto(titulo, resumo_tema, numero_vagas, criador)
+	projetos.append(projeto)
+	print(f"✓ Projeto publicado com sucesso: '{projeto.titulo}'")
+	print(f"  Criado por: {criador.nome} ({'Mentor' if isinstance(criador, Mentor) else 'Aluno'})")
+	print(f"  Vagas: {projeto.numero_vagas}")
+
+
 # Função para listar todos os mentores
 def listar_mentores():
 	print("\n=== Lista de Mentores Cadastrados ===")
@@ -122,6 +210,22 @@ def listar_alunos():
 		print(f"   Curso: {aluno.curso}")
 		print(f"   Áreas de interesse: {', '.join(aluno.areas_interesse)}")
 		print(f"   Habilidades técnicas: {', '.join(aluno.habilidades_tecnicas)}")
+
+
+# Função para listar todos os projetos
+def listar_projetos():
+	print("\n=== Lista de Projetos Publicados ===")
+	if not projetos:
+		print("Nenhum projeto publicado ainda.")
+		return
+	
+	for idx, projeto in enumerate(projetos, 1):
+		tipo_criador = "Mentor" if isinstance(projeto.criador, Mentor) else "Aluno"
+		print(f"\n{idx}. {projeto.titulo}")
+		print(f"   Criado por: {projeto.criador.nome} ({tipo_criador})")
+		print(f"   Resumo: {projeto.resumo_tema}")
+		print(f"   Vagas: {projeto.numero_vagas}")
+		print(f"   Participantes: {len(projeto.participantes)}")
 
 
 # Função para visualizar detalhes de um mentor
@@ -160,10 +264,12 @@ def menu_principal():
 		print("3. Listar Alunos")
 		print("4. Listar Mentores")
 		print("5. Visualizar Detalhes de Mentor")
-		print("6. Sair")
+		print("6. Publicar Projeto - RF03")
+		print("7. Listar Projetos")
+		print("8. Sair")
 		print("="*50)
 		
-		opcao = input("Escolha uma opção (1-6): ").strip()
+		opcao = input("Escolha uma opção (1-8): ").strip()
 		
 		if opcao == '1':
 			cadastrar_aluno()
@@ -176,6 +282,10 @@ def menu_principal():
 		elif opcao == '5':
 			visualizar_mentor()
 		elif opcao == '6':
+			publicar_projeto()
+		elif opcao == '7':
+			listar_projetos()
+		elif opcao == '8':
 			print("\nAté logo! Sistema finalizado.")
 			break
 		else:
