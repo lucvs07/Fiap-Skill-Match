@@ -50,6 +50,7 @@ class Projeto:
 		self.participantes = []  # lista de alunos participantes
 		self.status = "Aberto"  # status do projeto: "Aberto" ou "Fechado"
 		self.data_criacao = None  # data de criação do projeto
+		self.interessados = []  # lista de alunos interessados - RF06
 	
 	def adicionar_participante(self, aluno):
 		"""Adiciona um aluno como participante do projeto"""
@@ -80,6 +81,13 @@ class Projeto:
 	def abrir_projeto(self):
 		"""Reabre o projeto para inscrições"""
 		self.status = "Aberto"
+	
+	def adicionar_interessado(self, aluno):
+		"""Adiciona um aluno à lista de interessados - RF06"""
+		if aluno not in self.interessados:
+			self.interessados.append(aluno)
+			return True
+		return False
 	
 	def __repr__(self):
 		tipo_criador = "Mentor" if isinstance(self.criador, Mentor) else "Aluno"
@@ -194,6 +202,11 @@ class MuralDeProjetos:
 				print(f"Participantes Atuais:")
 				for p in projeto.participantes:
 					print(f"  • {p.nome} ({p.curso})")
+			
+			if projeto.interessados:
+				print(f"Alunos Interessados:")
+				for i in projeto.interessados:
+					print(f"  • {i.nome} ({i.curso})")
 		
 		print(f"\n{'='*70}")
 	
@@ -646,6 +659,65 @@ def exibir_diretorio_mentores():
 			print("Opcao invalida. Tente novamente.")
 
 
+# Função para manifestar interesse em um projeto - RF06
+def manifestar_interesse():
+	print("\n=== Manifestar Interesse em Projeto - RF06 ===")
+	
+	if not alunos:
+		print("Nenhum aluno cadastrado. Cadastre um aluno primeiro.")
+		return
+	
+	if not mural.obter_projetos_com_vagas():
+		print("Nenhum projeto com vagas disponíveis no momento.")
+		return
+	
+	# Escolher aluno interessado
+	listar_alunos()
+	try:
+		idx_aluno = int(input("Digite o número do aluno interessado: ")) - 1
+		if not (0 <= idx_aluno < len(alunos)):
+			print("Número inválido.")
+			return
+		aluno = alunos[idx_aluno]
+	except ValueError:
+		print("Entrada inválida.")
+		return
+	
+	# Listar projetos com vagas
+	projetos_com_vagas = mural.obter_projetos_com_vagas()
+	print("\nProjetos com vagas disponíveis:")
+	for idx, projeto in enumerate(projetos_com_vagas, 1):
+		tipo_criador = "Mentor" if isinstance(projeto.criador, Mentor) else "Aluno"
+		print(f"{idx}. {projeto.titulo}")
+		print(f"   Tema: {projeto.resumo_tema}")
+		print(f"   Criador: {projeto.criador.nome} ({tipo_criador})")
+		print(f"   Vagas disponíveis: {projeto.vagas_disponiveis()} de {projeto.numero_vagas}")
+		print(f"   Participantes atuais: {len(projeto.participantes)}")
+		if projeto.interessados:
+			print(f"   Alunos interessados: {len(projeto.interessados)}")
+		print()
+	
+	try:
+		idx_projeto = int(input("Digite o número do projeto de interesse: ")) - 1
+		if not (0 <= idx_projeto < len(projetos_com_vagas)):
+			print("Número inválido.")
+			return
+		projeto = projetos_com_vagas[idx_projeto]
+	except ValueError:
+		print("Entrada inválida.")
+		return
+	
+	# Adicionar interesse
+	if projeto.adicionar_interessado(aluno):
+		print(f"\n✓ Interesse manifestado com sucesso!")
+		print(f"  Aluno: {aluno.nome}")
+		print(f"  Projeto: {projeto.titulo}")
+		print(f"  Responsável notificado: {projeto.criador.nome}")
+		
+	else:
+		print("Você já manifestou interesse neste projeto.")
+
+
 # Menu principal
 def menu_principal():
 	while True:
@@ -660,10 +732,11 @@ def menu_principal():
 		print("6. Publicar Projeto - RF03")
 		print("7. Mural de Projetos - RF04")
 		print("8. Diretorio de Mentores - RF05")
-		print("9. Sair")
+		print("9. Manifestar Interesse em Projeto - RF06")
+		print("10. Sair")
 		print("="*50)
 		
-		opcao = input("Escolha uma opcao (1-9): ").strip()
+		opcao = input("Escolha uma opcao (1-10): ").strip()
 		
 		if opcao == '1':
 			cadastrar_aluno()
@@ -682,6 +755,8 @@ def menu_principal():
 		elif opcao == '8':
 			exibir_diretorio_mentores()
 		elif opcao == '9':
+			manifestar_interesse()
+		elif opcao == '10':
 			print("\nAté logo! Sistema finalizado.")
 			break
 		else:
