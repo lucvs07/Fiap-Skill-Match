@@ -718,6 +718,92 @@ def manifestar_interesse():
 		print("Você já manifestou interesse neste projeto.")
 
 
+# Função para visualizar interessados nos projetos - RF07
+def visualizar_interessados():
+	print("\n=== Visualizar Interessados nos Projetos - RF07 ===")
+	
+	if not projetos:
+		print("Nenhum projeto publicado ainda.")
+		return
+	
+	# Escolher tipo de criador
+	print("Quem está visualizando os interessados?")
+	print("1. Mentor (Professor)")
+	print("2. Aluno Proponente")
+	tipo_criador = input("Escolha (1/2): ").strip()
+	
+	criadores = []
+	if tipo_criador == '1':
+		if not mentores:
+			print("Nenhum mentor cadastrado.")
+			return
+		criadores = mentores
+		tipo_nome = "Mentor"
+	elif tipo_criador == '2':
+		if not alunos:
+			print("Nenhum aluno cadastrado.")
+			return
+		criadores = alunos
+		tipo_nome = "Aluno"
+	else:
+		print("Opção inválida.")
+		return
+	
+	# Listar criadores
+	print(f"\n{tipo_nome}s disponíveis:")
+	for idx, criador in enumerate(criadores, 1):
+		print(f"{idx}. {criador.nome}")
+	
+	try:
+		idx_criador = int(input(f"Digite o número do {tipo_nome.lower()}: ")) - 1
+		if not (0 <= idx_criador < len(criadores)):
+			print("Número inválido.")
+			return
+		criador = criadores[idx_criador]
+	except ValueError:
+		print("Entrada inválida.")
+		return
+	
+	# Listar projetos do criador
+	projetos_criador = [p for p in projetos if p.criador == criador]
+	if not projetos_criador:
+		print(f"Nenhum projeto criado por {criador.nome}.")
+		return
+	
+	print(f"\nProjetos criados por {criador.nome}:")
+	for idx, projeto in enumerate(projetos_criador, 1):
+		print(f"{idx}. {projeto.titulo} - Status: {projeto.status} - Interessados: {len(projeto.interessados)}")
+	
+	try:
+		idx_projeto = int(input("Digite o número do projeto: ")) - 1
+		if not (0 <= idx_projeto < len(projetos_criador)):
+			print("Número inválido.")
+			return
+		projeto = projetos_criador[idx_projeto]
+	except ValueError:
+		print("Entrada inválida.")
+		return
+	
+	# Mostrar interessados
+	if not projeto.interessados:
+		print(f"\nNenhum aluno manifestou interesse em '{projeto.titulo}' ainda.")
+		return
+	
+	print(f"\n{'='*70}")
+	print(f"ALUNOS INTERESSADOS EM: {projeto.titulo}")
+	print(f"Total: {len(projeto.interessados)} aluno(s)")
+	print(f"{'='*70}")
+	
+	for idx, aluno in enumerate(projeto.interessados, 1):
+		print(f"\n--- Aluno #{idx}: {aluno.nome} ---")
+		print(f"Curso: {aluno.curso}")
+		print(f"Áreas de interesse: {', '.join(aluno.areas_interesse)}")
+		print(f"Habilidades técnicas: {', '.join(aluno.habilidades_tecnicas)}")
+		print("---")
+	
+	print(f"\n{'='*70}")
+
+
 # Menu principal
 def menu_principal():
 	while True:
@@ -733,10 +819,11 @@ def menu_principal():
 		print("7. Mural de Projetos - RF04")
 		print("8. Diretorio de Mentores - RF05")
 		print("9. Manifestar Interesse em Projeto - RF06")
-		print("10. Sair")
+		print("10. Visualizar Interessados nos Projetos - RF07")
+		print("11. Sair")
 		print("="*50)
 		
-		opcao = input("Escolha uma opcao (1-10): ").strip()
+		opcao = input("Escolha uma opcao (1-11): ").strip()
 		
 		if opcao == '1':
 			cadastrar_aluno()
@@ -757,6 +844,8 @@ def menu_principal():
 		elif opcao == '9':
 			manifestar_interesse()
 		elif opcao == '10':
+			visualizar_interessados()
+		elif opcao == '11':
 			print("\nAté logo! Sistema finalizado.")
 			break
 		else:
