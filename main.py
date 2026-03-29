@@ -300,6 +300,26 @@ class DiretorioMentores:
 		print("=" * 70)
 
 
+
+# === Funções utilitárias para persistência JSON ===
+import json
+import os
+
+def salvar_json(caminho, lista):
+	"""Salva uma lista de objetos (já convertidos para dict) em um arquivo JSON."""
+	with open(caminho, 'w', encoding='utf-8') as f:
+		json.dump(lista, f, ensure_ascii=False, indent=2)
+
+def carregar_json(caminho):
+	"""Carrega uma lista de dicionários de um arquivo JSON. Retorna lista vazia se não existir."""
+	if not os.path.exists(caminho):
+		return []
+	with open(caminho, 'r', encoding='utf-8') as f:
+		try:
+			return json.load(f)
+		except Exception:
+			return []
+
 # Listas para armazenar os usuários cadastrados
 alunos = []
 mentores = []
