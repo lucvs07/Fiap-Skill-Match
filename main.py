@@ -565,7 +565,7 @@ def exibir_mural_projetos():
 		print("6. Voltar ao menu principal")
 		print("="*70)
 		
-		opcao = input("Escolha uma opção (1-6): ").strip()
+		opcao = input_choice("Escolha uma opção (1-6): ", [str(i) for i in range(1, 7)])
 		
 		if opcao == '1':
 			mural.exibir_mural_resumido()
@@ -574,28 +574,20 @@ def exibir_mural_projetos():
 			mural.exibir_mural_detalhado()
 		
 		elif opcao == '3':
-			palavra_chave = input("\nDigite a palavra-chave para buscar: ").strip()
-			if palavra_chave:
-				mural.exibir_mural_com_filtro(palavra_chave)
-			else:
-				print("Palavra-chave vazia. Tente novamente.")
+			palavra_chave = input_nonempty("\nDigite a palavra-chave para buscar: ")
+			mural.exibir_mural_com_filtro(palavra_chave)
 		
 		elif opcao == '4':
 			print("\nFiltrar por tipo de criador:")
 			print("1. Projetos de Mentores")
 			print("2. Projetos de Alunos")
-			tipo_escolha = input("Escolha (1/2): ").strip()
-			
+			tipo_escolha = input_choice("Escolha (1/2): ", ['1', '2'])
 			if tipo_escolha == '1':
 				projetos_filtrados = mural.filtrar_por_criador_tipo('Mentor')
 				tipo_nome = "Mentores"
-			elif tipo_escolha == '2':
+			else:
 				projetos_filtrados = mural.filtrar_por_criador_tipo('Aluno')
 				tipo_nome = "Alunos"
-			else:
-				print("Opção inválida.")
-				continue
-			
 			if not projetos_filtrados:
 				print(f"\nNenhum projeto de {tipo_nome} disponível.")
 			else:
@@ -603,7 +595,6 @@ def exibir_mural_projetos():
 				print(f"PROJETOS DE {tipo_nome.upper()}")
 				print(f"Total: {len(projetos_filtrados)} projeto(s)")
 				print(f"{'='*70}")
-				
 				for idx, projeto in enumerate(projetos_filtrados, 1):
 					print(f"\n[{idx}] {projeto.titulo}")
 					print(f"    Criador: {projeto.criador.nome}")
@@ -677,17 +668,13 @@ def exibir_diretorio_mentores():
 		print("4. Voltar ao menu principal")
 		print("=" * 70)
 
-		opcao = input("Escolha uma opcao (1-4): ").strip()
+		opcao = input_choice("Escolha uma opcao (1-4): ", [str(i) for i in range(1, 5)])
 
 		if opcao == '1':
 			diretorio_mentores.exibir_diretorio_resumido()
 
 		elif opcao == '2':
-			palavra_chave = input("\nDigite a especialidade para buscar: ").strip()
-			if not palavra_chave:
-				print("Especialidade vazia. Tente novamente.")
-				continue
-
+			palavra_chave = input_nonempty("\nDigite a especialidade para buscar: ")
 			mentores_filtrados = diretorio_mentores.filtrar_por_especialidade(palavra_chave)
 			print("\n" + "=" * 70)
 			print(f"RESULTADOS DA BUSCA - ESPECIALIDADE: {palavra_chave}")
@@ -731,7 +718,7 @@ def menu_principal():
 		print("9. Sair")
 		print("="*50)
 		
-		opcao = input("Escolha uma opcao (1-9): ").strip()
+		opcao = input_choice("Escolha uma opcao (1-9): ", [str(i) for i in range(1, 10)])
 		
 		if opcao == '1':
 			cadastrar_aluno()
