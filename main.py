@@ -1,3 +1,31 @@
+# === Utilitários de Validação de Entrada (RNF04) ===
+def input_int(prompt, min_value=None, max_value=None, error_msg="Entrada inválida. Digite um número inteiro."):
+	while True:
+		val = input(prompt).strip()
+		try:
+			num = int(val)
+			if (min_value is not None and num < min_value) or (max_value is not None and num > max_value):
+				print(f"Valor deve estar entre {min_value} e {max_value}. Tente novamente.")
+				continue
+			return num
+		except ValueError:
+			print(error_msg)
+
+def input_nonempty(prompt, error_msg="Campo obrigatório. Não pode ser vazio."):
+	while True:
+		val = input(prompt).strip()
+		if val:
+			return val
+		print(error_msg)
+
+def input_choice(prompt, choices, error_msg="Opção inválida. Tente novamente."):
+	choices_set = set(choices)
+	while True:
+		val = input(prompt).strip()
+		if val in choices_set:
+			return val
+		print(error_msg)
+
 
 # Classe para representar um aluno
 class Aluno:
