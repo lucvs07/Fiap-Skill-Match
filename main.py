@@ -78,6 +78,7 @@ class Projeto:
 		self.participantes = []  # lista de alunos participantes
 		self.status = "Aberto"  # status do projeto: "Aberto" ou "Fechado"
 		self.data_criacao = None  # data de criação do projeto
+		self.interessados = []  # lista de alunos interessados
 	
 	def adicionar_participante(self, aluno):
 		"""Adiciona um aluno como participante do projeto"""
@@ -335,17 +336,26 @@ def carregar_dados():
 	# Carregar alunos
 	if os.path.exists(ARQ_ALUNOS):
 		with open(ARQ_ALUNOS, 'r', encoding='utf-8') as f:
-			alunos_data = json.load(f)
+			try:
+				alunos_data = json.load(f)
+			except Exception:
+				alunos_data = []
 			alunos = [Aluno(a['nome'], a['curso'], a['areas_interesse'], a.get('habilidades_tecnicas', [])) for a in alunos_data]
 	# Carregar mentores
 	if os.path.exists(ARQ_MENTORES):
 		with open(ARQ_MENTORES, 'r', encoding='utf-8') as f:
-			mentores_data = json.load(f)
+			try:
+				mentores_data = json.load(f)
+			except Exception:
+				mentores_data = []
 			mentores = [Mentor(m['nome'], m['departamento'], m['linhas_pesquisa'], m['disponibilidade'], m.get('email'), m.get('especialidades', [])) for m in mentores_data]
 	# Carregar projetos
 	if os.path.exists(ARQ_PROJETOS):
 		with open(ARQ_PROJETOS, 'r', encoding='utf-8') as f:
-			projetos_data = json.load(f)
+			try:
+				projetos_data = json.load(f)
+			except Exception:
+				projetos_data = []
 			# Mapear criadores e participantes por nome
 			nome_aluno = {a.nome: a for a in alunos}
 			nome_mentor = {m.nome: m for m in mentores}
