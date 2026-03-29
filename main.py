@@ -426,14 +426,12 @@ diretorio_mentores.definir_mentores(mentores)
 # Função para cadastrar um novo aluno
 def cadastrar_aluno():
 	print("\n=== Cadastro de Aluno ===")
-	nome = input("Nome: ")
-	curso = input("Curso: ")
-	areas = input("Áreas de interesse (separadas por vírgula): ")
+	nome = input_nonempty("Nome: ")
+	curso = input_nonempty("Curso: ")
+	areas = input_nonempty("Áreas de interesse (separadas por vírgula): ")
 	areas_interesse = [a.strip() for a in areas.split(',') if a.strip()]
-    
 	habilidades = input("Habilidades técnicas/Stacks (separadas por vírgula): ")
 	habilidades_tecnicas = [h.strip() for h in habilidades.split(',') if h.strip()]
-    
 	aluno = Aluno(nome, curso, areas_interesse, habilidades_tecnicas)
 	alunos.append(aluno)
 	salvar_dados(alunos, mentores, projetos)
@@ -443,26 +441,20 @@ def cadastrar_aluno():
 # Função para cadastrar um novo mentor - RF02
 def cadastrar_mentor():
 	print("\n=== Cadastro de Mentor (Professor) - RF02 ===")
-	nome = input("Nome completo: ")
-	departamento = input("Departamento: ")
-    
-	linhas = input("Linhas de pesquisa (separadas por vírgula): ")
+	nome = input_nonempty("Nome completo: ")
+	departamento = input_nonempty("Departamento: ")
+	linhas = input_nonempty("Linhas de pesquisa (separadas por vírgula): ")
 	linhas_pesquisa = [l.strip() for l in linhas.split(',') if l.strip()]
-    
 	print("Indique sua disponibilidade para orientar ICs:")
 	print("1. Alta (disponível para múltiplas orientações)")
 	print("2. Média (disponível para algumas orientações)")
 	print("3. Baixa (disponível para poucas orientações)")
-	disponibilidade_escolha = input("Escolha (1/2/3): ").strip()
-    
+	disponibilidade_escolha = input_choice("Escolha (1/2/3): ", ['1', '2', '3'])
 	disponibilidade_map = {'1': 'Alta', '2': 'Média', '3': 'Baixa'}
-	disponibilidade = disponibilidade_map.get(disponibilidade_escolha, 'Média')
-    
+	disponibilidade = disponibilidade_map[disponibilidade_escolha]
 	email = input("Email (opcional): ").strip() or None
-    
 	especialidades = input("Especialidades técnicas (separadas por vírgula, opcional): ")
 	especialidades_lista = [e.strip() for e in especialidades.split(',') if e.strip()]
-    
 	mentor = Mentor(nome, departamento, linhas_pesquisa, disponibilidade, email, especialidades_lista)
 	mentores.append(mentor)
 	salvar_dados(alunos, mentores, projetos)
@@ -479,62 +471,26 @@ def publicar_projeto():
 	print("Quem está criando o projeto?")
 	print("1. Mentor (Professor)")
 	print("2. Aluno Proponente")
-	tipo_criador = input("Escolha (1/2): ").strip()
-    
+	tipo_criador = input_choice("Escolha (1/2): ", ['1', '2'])
 	criador = None
 	if tipo_criador == '1':
 		if not mentores:
 			print("Nenhum mentor cadastrado. Cadastre um mentor primeiro.")
 			return
 		listar_mentores()
-		try:
-			idx = int(input("Digite o número do mentor criador: ")) - 1
-			if 0 <= idx < len(mentores):
-				criador = mentores[idx]
-			else:
-				print("Número inválido.")
-				return
-		except ValueError:
-			print("Entrada inválida.")
-			return
-	elif tipo_criador == '2':
+		idx = input_int("Digite o número do mentor criador: ", min_value=1, max_value=len(mentores)) - 1
+		criador = mentores[idx]
+	else:
 		if not alunos:
 			print("Nenhum aluno cadastrado. Cadastre um aluno primeiro.")
 			return
 		listar_alunos()
-		try:
-			idx = int(input("Digite o número do aluno proponente: ")) - 1
-			if 0 <= idx < len(alunos):
-				criador = alunos[idx]
-			else:
-				print("Número inválido.")
-				return
-		except ValueError:
-			print("Entrada inválida.")
-			return
-	else:
-		print("Opção inválida.")
-		return
-    
+		idx = input_int("Digite o número do aluno proponente: ", min_value=1, max_value=len(alunos)) - 1
+		criador = alunos[idx]
 	# Coletar informações do projeto
-	titulo = input("Título do projeto: ").strip()
-	if not titulo:
-		print("Título é obrigatório.")
-		return
-    
-	resumo_tema = input("Resumo do tema: ").strip()
-	if not resumo_tema:
-		print("Resumo é obrigatório.")
-		return
-    
-	try:
-		numero_vagas = int(input("Número de vagas para o grupo: ").strip())
-		if numero_vagas <= 0:
-			print("Número de vagas deve ser positivo.")
-			return
-	except ValueError:
-		print("Número de vagas deve ser um inteiro.")
-		return
+	titulo = input_nonempty("Título do projeto: ")
+	resumo_tema = input_nonempty("Resumo do tema: ")
+	numero_vagas = input_int("Número de vagas para o grupo: ", min_value=1)
     
 	# Criar o projeto
 	projeto = Projeto(titulo, resumo_tema, numero_vagas, criador)
