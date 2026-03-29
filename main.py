@@ -54,6 +54,8 @@ class Mentor:
 		"""Adiciona um aluno à lista de orientandos"""
 		if aluno not in self.alunos_orientando:
 			self.alunos_orientando.append(aluno)
+			# Persistência após alteração
+			salvar_dados(alunos, mentores, projetos)
 			return True
 		return False
 	
@@ -61,6 +63,8 @@ class Mentor:
 		"""Remove um aluno da lista de orientandos"""
 		if aluno in self.alunos_orientando:
 			self.alunos_orientando.remove(aluno)
+			# Persistência após alteração
+			salvar_dados(alunos, mentores, projetos)
 			return True
 		return False
 	
@@ -76,14 +80,16 @@ class Projeto:
 		self.numero_vagas = numero_vagas
 		self.criador = criador  # pode ser Mentor ou Aluno
 		self.participantes = []  # lista de alunos participantes
-		self.status = "Aberto"  # status do projeto: "Aberto" ou "Fechado"
+		self.status = "Em Formação"  # status do projeto: "Em Formação" ou "Grupo Fechado"
 		self.data_criacao = None  # data de criação do projeto
-		self.interessados = []  # lista de alunos interessados
+		self.interessados = []  # lista de alunos interessados - RF06
 	
 	def adicionar_participante(self, aluno):
 		"""Adiciona um aluno como participante do projeto"""
 		if aluno not in self.participantes:
 			self.participantes.append(aluno)
+			# Persistência após alteração
+			salvar_dados(alunos, mentores, projetos)
 			return True
 		return False
 	
@@ -91,6 +97,8 @@ class Projeto:
 		"""Remove um aluno da lista de participantes"""
 		if aluno in self.participantes:
 			self.participantes.remove(aluno)
+			# Persistência após alteração
+			salvar_dados(alunos, mentores, projetos)
 			return True
 		return False
 	
@@ -102,17 +110,26 @@ class Projeto:
 		"""Verifica se o projeto está com todas as vagas preenchidas"""
 		return self.vagas_disponiveis() <= 0
 	
-	def fechar_projeto(self):
-		"""Fecha o projeto para novas inscrições"""
-		self.status = "Fechado"
-	
-	def abrir_projeto(self):
-		"""Reabre o projeto para inscrições"""
-		self.status = "Aberto"
+	def marcar_em_formacao(self):
+		"""Marca o projeto como em formação (vagas abertas)"""
+		self.status = "Em Formação"
+
+	def marcar_grupo_fechado(self):
+		"""Marca o projeto como grupo fechado (IC iniciada)"""
+		self.status = "Grupo Fechado"
+
+	def adicionar_interessado(self, aluno):
+		"""Adiciona um aluno à lista de interessados - RF06"""
+		if aluno not in self.interessados:
+			self.interessados.append(aluno)
+			# Persistência após alteração
+			salvar_dados(alunos, mentores, projetos)
+			return True
+		return False
 	
 	def __repr__(self):
 		tipo_criador = "Mentor" if isinstance(self.criador, Mentor) else "Aluno"
-		return f"Projeto(titulo={self.titulo}, resumo={self.resumo_tema[:50]}..., vagas={self.numero_vagas}, criador={tipo_criador} {self.criador.nome})"
+		return f"Projeto(titulo={self.titulo}, resumo={self.resumo_tema[:50]}..., vagas={self.numero_vagas}, status={self.status}, criador={tipo_criador} {self.criador.nome})"
 
 
 # Classe para gerenciar o Mural de Projetos - RF04
@@ -124,51 +141,51 @@ class MuralDeProjetos:
 		"""Define a lista de projetos a ser gerenciada"""
 		self.projetos_lista = projetos_lista
 	
-	def obter_projetos_abertos(self):
-		"""Retorna apenas os projetos com status 'Aberto'"""
-		return [p for p in self.projetos_lista if p.status == "Aberto"]
+	def obter_projetos_em_formacao(self):
+		"""Retorna apenas os projetos com status 'Em Formação'"""
+		return [p for p in self.projetos_lista if p.status == "Em Formação"]
 	
 	def obter_projetos_com_vagas(self):
-		"""Retorna projetos que ainda possuem vagas disponíveis"""
-		return [p for p in self.projetos_lista if p.vagas_disponiveis() > 0 and p.status == "Aberto"]
+		"""Retorna projetos em formação que ainda possuem vagas disponíveis"""
+		return [p for p in self.projetos_lista if p.vagas_disponiveis() > 0 and p.status == "Em Formação"]
 	
 	def filtrar_por_tema(self, palavra_chave):
 		"""Filtra projetos por palavra-chave no título ou resumo"""
 		palavra_chave = palavra_chave.lower()
-		return [p for p in self.obter_projetos_abertos() 
+		return [p for p in self.obter_projetos_em_formacao() 
 				if palavra_chave in p.titulo.lower() or palavra_chave in p.resumo_tema.lower()]
 	
 	def filtrar_por_criador_tipo(self, tipo):
 		"""Filtra projetos por tipo de criador ('Mentor' ou 'Aluno')"""
 		if tipo.lower() == 'mentor':
-			return [p for p in self.obter_projetos_abertos() if isinstance(p.criador, Mentor)]
+			return [p for p in self.obter_projetos_em_formacao() if isinstance(p.criador, Mentor)]
 		elif tipo.lower() == 'aluno':
-			return [p for p in self.obter_projetos_abertos() if isinstance(p.criador, Aluno)]
-		return self.obter_projetos_abertos()
+			return [p for p in self.obter_projetos_em_formacao() if isinstance(p.criador, Aluno)]
+		return self.obter_projetos_em_formacao()
 	
 	def contar_projetos_abertos(self):
-		"""Retorna a quantidade de projetos abertos"""
-		return len(self.obter_projetos_abertos())
+		"""Retorna a quantidade de projetos em formação"""
+		return len(self.obter_projetos_em_formacao())
 	
 	def contar_vagas_totais_disponiveis(self):
-		"""Retorna o total de vagas disponíveis em todos os projetos abertos"""
-		return sum(p.vagas_disponiveis() for p in self.obter_projetos_abertos())
+		"""Retorna o total de vagas disponíveis em todos os projetos em formação"""
+		return sum(p.vagas_disponiveis() for p in self.obter_projetos_em_formacao())
 	
 	def exibir_mural_resumido(self):
 		"""Exibe o mural de projetos de forma resumida e rápida"""
-		projetos_abertos = self.obter_projetos_abertos()
+		projetos_abertos = self.obter_projetos_em_formacao()
 		
 		if not projetos_abertos:
 			print("\n" + "="*70)
-			print("MURAL DE PROJETOS - NENHUM PROJETO ABERTO")
+			print("MURAL DE PROJETOS - NENHUM PROJETO EM FORMAÇÃO")
 			print("="*70)
-			print("Não há projetos de IC abertos no momento.")
+			print("Não há projetos de IC em formação no momento.")
 			return
 		
 		print("\n" + "="*70)
 		print("MURAL DE PROJETOS - RF04")
 		print("="*70)
-		print(f"Total de projetos abertos: {len(projetos_abertos)}")
+		print(f"Total de projetos em formação: {len(projetos_abertos)}")
 		print(f"Total de vagas disponíveis: {self.contar_vagas_totais_disponiveis()}")
 		print("="*70)
 		
@@ -184,11 +201,11 @@ class MuralDeProjetos:
 	
 	def exibir_mural_detalhado(self):
 		"""Exibe o mural de projetos com informações detalhadas"""
-		projetos_abertos = self.obter_projetos_abertos()
+		projetos_abertos = self.obter_projetos_em_formacao()
 		
 		if not projetos_abertos:
 			print("\n" + "="*70)
-			print("MURAL DE PROJETOS - NENHUM PROJETO ABERTO")
+			print("MURAL DE PROJETOS - NENHUM PROJETO EM FORMAÇÃO")
 			print("="*70)
 			return
 		
@@ -223,6 +240,11 @@ class MuralDeProjetos:
 				print(f"Participantes Atuais:")
 				for p in projeto.participantes:
 					print(f"  • {p.nome} ({p.curso})")
+			
+			if projeto.interessados:
+				print(f"Alunos Interessados:")
+				for i in projeto.interessados:
+					print(f"  • {i.nome} ({i.curso})")
 		
 		print(f"\n{'='*70}")
 	
@@ -550,6 +572,45 @@ def listar_projetos():
 		print(f"   Resumo: {projeto.resumo_tema}")
 		print(f"   Vagas: {projeto.numero_vagas}")
 		print(f"   Participantes: {len(projeto.participantes)}")
+		print(f"   Status: {projeto.status}")
+
+
+def alterar_status_vaga():
+	"""RF08 - Permite ao responsável marcar status do projeto"""
+	if not projetos:
+		print("\nNenhum projeto cadastrado ainda.")
+		return
+	
+	print("\n=== Alterar Status da Vaga (RF08) ===")
+	for idx, projeto in enumerate(projetos, 1):
+		print(f"{idx}. {projeto.titulo} - Status atual: {projeto.status}")
+
+	try:
+		idx = int(input("Escolha o número do projeto para atualizar (0 para voltar): ").strip()) - 1
+		if idx == -1:
+			return
+		if not (0 <= idx < len(projetos)):
+			print("Número inválido.")
+			return
+	except ValueError:
+		print("Entrada inválida.")
+		return
+	
+	projeto = projetos[idx]
+
+	print("\nSelecione o novo status:")
+	print("1. Em Formação (vagas abertas)")
+	print("2. Grupo Fechado (IC iniciada)")
+	status_choice = input("Escolha (1/2): ").strip()
+
+	if status_choice == '1':
+		projeto.marcar_em_formacao()
+		print(f"Status atualizado para 'Em Formação' em '{projeto.titulo}'")
+	elif status_choice == '2':
+		projeto.marcar_grupo_fechado()
+		print(f"Status atualizado para 'Grupo Fechado' em '{projeto.titulo}'")
+	else:
+		print("Opção inválida. Nenhuma alteração feita.")
 
 
 # Função para exibir o Mural de Projetos - RF04
@@ -604,14 +665,14 @@ def exibir_mural_projetos():
 					print(f"    Vagas disponíveis: {projeto.vagas_disponiveis()} de {projeto.numero_vagas}")
 		
 		elif opcao == '5':
-			projetos_abertos = mural.obter_projetos_abertos()
+			projetos_abertos = mural.obter_projetos_em_formacao()
 			projetos_com_vagas = mural.obter_projetos_com_vagas()
 			
 			print("\n" + "="*70)
 			print("ESTATÍSTICAS DO MURAL DE PROJETOS")
 			print("="*70)
 			print(f"Total de projetos publicados: {len(projetos)}")
-			print(f"Total de projetos abertos:    {len(projetos_abertos)}")
+			print(f"Total de projetos em formação: {len(projetos_abertos)}")
 			print(f"Projetos com vagas livres:    {len(projetos_com_vagas)}")
 			print(f"Total de vagas disponíveis:   {mural.contar_vagas_totais_disponiveis()}")
 			
@@ -702,6 +763,151 @@ def exibir_diretorio_mentores():
 			print("Opcao invalida. Tente novamente.")
 
 
+# Função para manifestar interesse em um projeto - RF06
+def manifestar_interesse():
+	print("\n=== Manifestar Interesse em Projeto - RF06 ===")
+	
+	if not alunos:
+		print("Nenhum aluno cadastrado. Cadastre um aluno primeiro.")
+		return
+	
+	if not mural.obter_projetos_com_vagas():
+		print("Nenhum projeto com vagas disponíveis no momento.")
+		return
+	
+	# Escolher aluno interessado
+	listar_alunos()
+	try:
+		idx_aluno = int(input("Digite o número do aluno interessado: ")) - 1
+		if not (0 <= idx_aluno < len(alunos)):
+			print("Número inválido.")
+			return
+		aluno = alunos[idx_aluno]
+	except ValueError:
+		print("Entrada inválida.")
+		return
+	
+	# Listar projetos com vagas
+	projetos_com_vagas = mural.obter_projetos_com_vagas()
+	print("\nProjetos com vagas disponíveis:")
+	for idx, projeto in enumerate(projetos_com_vagas, 1):
+		tipo_criador = "Mentor" if isinstance(projeto.criador, Mentor) else "Aluno"
+		print(f"{idx}. {projeto.titulo}")
+		print(f"   Tema: {projeto.resumo_tema}")
+		print(f"   Criador: {projeto.criador.nome} ({tipo_criador})")
+		print(f"   Vagas disponíveis: {projeto.vagas_disponiveis()} de {projeto.numero_vagas}")
+		print(f"   Participantes atuais: {len(projeto.participantes)}")
+		if projeto.interessados:
+			print(f"   Alunos interessados: {len(projeto.interessados)}")
+		print()
+	
+	try:
+		idx_projeto = int(input("Digite o número do projeto de interesse: ")) - 1
+		if not (0 <= idx_projeto < len(projetos_com_vagas)):
+			print("Número inválido.")
+			return
+		projeto = projetos_com_vagas[idx_projeto]
+	except ValueError:
+		print("Entrada inválida.")
+		return
+	
+	# Adicionar interesse
+	if projeto.adicionar_interessado(aluno):
+		print(f"\n✓ Interesse manifestado com sucesso!")
+		print(f"  Aluno: {aluno.nome}")
+		print(f"  Projeto: {projeto.titulo}")
+		print(f"  Responsável notificado: {projeto.criador.nome}")
+		
+	else:
+		print("Você já manifestou interesse neste projeto.")
+
+
+# Função para visualizar interessados nos projetos - RF07
+def visualizar_interessados():
+	print("\n=== Visualizar Interessados nos Projetos - RF07 ===")
+	
+	if not projetos:
+		print("Nenhum projeto publicado ainda.")
+		return
+	
+	# Escolher tipo de criador
+	print("Quem está visualizando os interessados?")
+	print("1. Mentor (Professor)")
+	print("2. Aluno Proponente")
+	tipo_criador = input("Escolha (1/2): ").strip()
+	
+	criadores = []
+	if tipo_criador == '1':
+		if not mentores:
+			print("Nenhum mentor cadastrado.")
+			return
+		criadores = mentores
+		tipo_nome = "Mentor"
+	elif tipo_criador == '2':
+		if not alunos:
+			print("Nenhum aluno cadastrado.")
+			return
+		criadores = alunos
+		tipo_nome = "Aluno"
+	else:
+		print("Opção inválida.")
+		return
+	
+	# Listar criadores
+	print(f"\n{tipo_nome}s disponíveis:")
+	for idx, criador in enumerate(criadores, 1):
+		print(f"{idx}. {criador.nome}")
+	
+	try:
+		idx_criador = int(input(f"Digite o número do {tipo_nome.lower()}: ")) - 1
+		if not (0 <= idx_criador < len(criadores)):
+			print("Número inválido.")
+			return
+		criador = criadores[idx_criador]
+	except ValueError:
+		print("Entrada inválida.")
+		return
+	
+	# Listar projetos do criador
+	projetos_criador = [p for p in projetos if p.criador == criador]
+	if not projetos_criador:
+		print(f"Nenhum projeto criado por {criador.nome}.")
+		return
+	
+	print(f"\nProjetos criados por {criador.nome}:")
+	for idx, projeto in enumerate(projetos_criador, 1):
+		print(f"{idx}. {projeto.titulo} - Status: {projeto.status} - Interessados: {len(projeto.interessados)}")
+	
+	try:
+		idx_projeto = int(input("Digite o número do projeto: ")) - 1
+		if not (0 <= idx_projeto < len(projetos_criador)):
+			print("Número inválido.")
+			return
+		projeto = projetos_criador[idx_projeto]
+	except ValueError:
+		print("Entrada inválida.")
+		return
+	
+	# Mostrar interessados
+	if not projeto.interessados:
+		print(f"\nNenhum aluno manifestou interesse em '{projeto.titulo}' ainda.")
+		return
+	
+	print(f"\n{'='*70}")
+	print(f"ALUNOS INTERESSADOS EM: {projeto.titulo}")
+	print(f"Total: {len(projeto.interessados)} aluno(s)")
+	print(f"{'='*70}")
+	
+	for idx, aluno in enumerate(projeto.interessados, 1):
+		print(f"\n--- Aluno #{idx}: {aluno.nome} ---")
+		print(f"Curso: {aluno.curso}")
+		print(f"Áreas de interesse: {', '.join(aluno.areas_interesse)}")
+		print(f"Habilidades técnicas: {', '.join(aluno.habilidades_tecnicas)}")
+		print("---")
+	
+	print(f"\n{'='*70}")
+
+
 # Menu principal
 def menu_principal():
 	while True:
@@ -716,10 +922,13 @@ def menu_principal():
 		print("6. Publicar Projeto - RF03")
 		print("7. Mural de Projetos - RF04")
 		print("8. Diretorio de Mentores - RF05")
-		print("9. Sair")
+		print("9. Manifestar Interesse em Projeto - RF06")
+		print("10. Visualizar Interessados nos Projetos - RF07")
+		print("11. Gerenciar Status da Vaga - RF08")
+		print("12. Sair")
 		print("="*50)
 		
-		opcao = input_choice("Escolha uma opcao (1-9): ", [str(i) for i in range(1, 10)])
+		opcao = input_choice("Escolha uma opcao (1-12): ", [str(i) for i in range(1, 13)])
 		
 		if opcao == '1':
 			cadastrar_aluno()
@@ -738,6 +947,12 @@ def menu_principal():
 		elif opcao == '8':
 			exibir_diretorio_mentores()
 		elif opcao == '9':
+			manifestar_interesse()
+		elif opcao == '10':
+			visualizar_interessados()
+		elif opcao == '11':
+			alterar_status_vaga()
+		elif opcao == '12':
 			print("\nAté logo! Sistema finalizado.")
 			break
 		else:
