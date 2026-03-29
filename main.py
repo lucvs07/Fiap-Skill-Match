@@ -313,10 +313,91 @@ class DiretorioMentores:
 		print("=" * 70)
 
 
-# Listas para armazenar os usuários cadastrados
-alunos = []
-mentores = []
-projetos = []
+
+# ===== Persistência de Dados Local (JSON) =====
+import json
+import os
+
+def carregar_dados():
+	alunos, mentores, projetos = [], [], []
+	# Carregar alunos
+	if os.path.exists(ARQ_ALUNOS):
+		with open(ARQ_ALUNOS, 'r', encoding='utf-8') as f:
+			alunos_data = json.load(f)
+			alunos = [Aluno(a['nome'], a['curso'], a['areas_interesse'], a.get('habilidades_tecnicas', [])) for a in alunos_data]
+	# Carregar mentores
+	if os.path.exists(ARQ_MENTORES):
+		with open(ARQ_MENTORES, 'r', encoding='utf-8') as f:
+			mentores_data = json.load(f)
+			mentores = [Mentor(m['nome'], m['departamento'], m['linhas_pesquisa'], m['disponibilidade'], m.get('email'), m.get('especialidades', [])) for m in mentores_data]
+	# Carregar projetos
+	if os.path.exists(ARQ_PROJETOS):
+		with open(ARQ_PROJETOS, 'r', encoding='utf-8') as f:
+			projetos_data = json.load(f)
+			# Mapear criadores e participantes por nome
+			nome_aluno = {a.nome: a for a in alunos}
+			nome_mentor = {m.nome: m for m in mentores}
+			for p in projetos_data:
+				if p['criador_tipo'] == 'Mentor':
+					criador = nome_mentor.get(p['criador_nome'])
+				else:
+					criador = nome_aluno.get(p['criador_nome'])
+				projeto = Projeto(p['titulo'], p['resumo_tema'], p['numero_vagas'], criador)
+				projeto.status = p.get('status', 'Em Formação')
+				projeto.data_criacao = p.get('data_criacao')
+				projeto.participantes = [nome_aluno[n] for n in p.get('participantes', []) if n in nome_aluno]
+				projeto.interessados = [nome_aluno[n] for n in p.get('interessados', []) if n in nome_aluno]
+				projetos.append(projeto)
+	# Atualizar alunos_orientando dos mentores
+	if os.path.exists(ARQ_MENTORES):
+		with open(ARQ_MENTORES, 'r', encoding='utf-8') as f:
+			mentores_data = json.load(f)
+			nome_aluno = {a.nome: a for a in alunos}
+			for m, mdata in zip(mentores, mentores_data):
+				m.alunos_orientando = [nome_aluno[n] for n in mdata.get('alunos_orientando', []) if n in nome_aluno]
+	return alunos, mentores, projetos
+
+# Caminhos dos arquivos de dados
+ARQ_ALUNOS = 'alunos.json'
+ARQ_MENTORES = 'mentores.json'
+ARQ_PROJETOS = 'projetos.json'
+
+alunos, mentores, projetos = carregar_dados()
+
+# Funções utilitárias para salvar e carregar dados
+def salvar_dados(alunos, mentores, projetos):
+	with open(ARQ_ALUNOS, 'w', encoding='utf-8') as f:
+		json.dump([{
+			'nome': a.nome,
+			'curso': a.curso,
+			'areas_interesse': a.areas_interesse,
+			'habilidades_tecnicas': a.habilidades_tecnicas
+		} for a in alunos], f, ensure_ascii=False, indent=2)
+
+	with open(ARQ_MENTORES, 'w', encoding='utf-8') as f:
+		json.dump([{
+			'nome': m.nome,
+			'departamento': m.departamento,
+			'linhas_pesquisa': m.linhas_pesquisa,
+			'disponibilidade': m.disponibilidade,
+			'email': m.email,
+			'especialidades': m.especialidades,
+			'alunos_orientando': [a.nome for a in m.alunos_orientando]
+		} for m in mentores], f, ensure_ascii=False, indent=2)
+
+	with open(ARQ_PROJETOS, 'w', encoding='utf-8') as f:
+		json.dump([{
+			'titulo': p.titulo,
+			'resumo_tema': p.resumo_tema,
+			'numero_vagas': p.numero_vagas,
+			'criador_tipo': 'Mentor' if isinstance(p.criador, Mentor) else 'Aluno',
+			'criador_nome': p.criador.nome,
+			'participantes': [a.nome for a in p.participantes],
+			'status': p.status,
+			'data_criacao': p.data_criacao,
+			'interessados': [a.nome for a in p.interessados]
+		} for p in projetos], f, ensure_ascii=False, indent=2)
+
 
 # Instância do Mural de Projetos - RF04
 mural = MuralDeProjetos()
@@ -340,6 +421,7 @@ def cadastrar_aluno():
 	
 	aluno = Aluno(nome, curso, areas_interesse, habilidades_tecnicas)
 	alunos.append(aluno)
+	salvar_dados(alunos, mentores, projetos)
 	print(f"✓ Aluno cadastrado com sucesso: {aluno.nome}")
 
 
@@ -368,6 +450,7 @@ def cadastrar_mentor():
 	
 	mentor = Mentor(nome, departamento, linhas_pesquisa, disponibilidade, email, especialidades_lista)
 	mentores.append(mentor)
+	salvar_dados(alunos, mentores, projetos)
 	print(f"✓ Mentor cadastrado com sucesso: {mentor.nome}")
 	print(f"  Disponibilidade: {mentor.disponibilidade}")
 	print(f"  Linhas de pesquisa: {', '.join(mentor.linhas_pesquisa)}")
@@ -441,6 +524,7 @@ def publicar_projeto():
 	# Criar o projeto
 	projeto = Projeto(titulo, resumo_tema, numero_vagas, criador)
 	projetos.append(projeto)
+	salvar_dados(alunos, mentores, projetos)
 	print(f"✓ Projeto publicado com sucesso: '{projeto.titulo}'")
 	print(f"  Criado por: {criador.nome} ({'Mentor' if isinstance(criador, Mentor) else 'Aluno'})")
 	print(f"  Vagas: {projeto.numero_vagas}")
@@ -526,9 +610,11 @@ def alterar_status_vaga():
 
 	if status_choice == '1':
 		projeto.marcar_em_formacao()
+		salvar_dados(alunos, mentores, projetos)
 		print(f"Status atualizado para 'Em Formação' em '{projeto.titulo}'")
 	elif status_choice == '2':
 		projeto.marcar_grupo_fechado()
+		salvar_dados(alunos, mentores, projetos)
 		print(f"Status atualizado para 'Grupo Fechado' em '{projeto.titulo}'")
 	else:
 		print("Opção inválida. Nenhuma alteração feita.")
@@ -748,11 +834,11 @@ def manifestar_interesse():
 	
 	# Adicionar interesse
 	if projeto.adicionar_interessado(aluno):
+		salvar_dados(alunos, mentores, projetos)
 		print(f"\n✓ Interesse manifestado com sucesso!")
 		print(f"  Aluno: {aluno.nome}")
 		print(f"  Projeto: {projeto.titulo}")
 		print(f"  Responsável notificado: {projeto.criador.nome}")
-		
 	else:
 		print("Você já manifestou interesse neste projeto.")
 
