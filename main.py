@@ -26,6 +26,8 @@ class Mentor:
 		"""Adiciona um aluno à lista de orientandos"""
 		if aluno not in self.alunos_orientando:
 			self.alunos_orientando.append(aluno)
+			# Persistência após alteração
+			salvar_dados(alunos, mentores, projetos)
 			return True
 		return False
 	
@@ -33,6 +35,8 @@ class Mentor:
 		"""Remove um aluno da lista de orientandos"""
 		if aluno in self.alunos_orientando:
 			self.alunos_orientando.remove(aluno)
+			# Persistência após alteração
+			salvar_dados(alunos, mentores, projetos)
 			return True
 		return False
 	
@@ -56,6 +60,8 @@ class Projeto:
 		"""Adiciona um aluno como participante do projeto"""
 		if aluno not in self.participantes:
 			self.participantes.append(aluno)
+			# Persistência após alteração
+			salvar_dados(alunos, mentores, projetos)
 			return True
 		return False
 	
@@ -63,6 +69,8 @@ class Projeto:
 		"""Remove um aluno da lista de participantes"""
 		if aluno in self.participantes:
 			self.participantes.remove(aluno)
+			# Persistência após alteração
+			salvar_dados(alunos, mentores, projetos)
 			return True
 		return False
 	
@@ -86,6 +94,8 @@ class Projeto:
 		"""Adiciona um aluno à lista de interessados - RF06"""
 		if aluno not in self.interessados:
 			self.interessados.append(aluno)
+			# Persistência após alteração
+			salvar_dados(alunos, mentores, projetos)
 			return True
 		return False
 	
