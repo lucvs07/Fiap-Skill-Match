@@ -299,24 +299,16 @@ class DiretorioMentores:
 			return
 
 		self.exibir_diretorio_resumido()
-		try:
-			opcao = int(input("\nDigite o numero do mentor para ver contato (0 para voltar): ").strip())
-		except ValueError:
-			print("Entrada invalida.")
-			return
-
+		opcao = input_int("\nDigite o numero do mentor para ver contato (0 para voltar): ", min_value=0, max_value=len(mentores_disponiveis))
 		if opcao == 0:
 			return
-
 		idx = opcao - 1
 		if not (0 <= idx < len(mentores_disponiveis)):
 			print("Numero invalido.")
 			return
-
 		mentor = mentores_disponiveis[idx]
 		especialidades = ", ".join(mentor.especialidades) if mentor.especialidades else "Nao informadas"
 		linhas = ", ".join(mentor.linhas_pesquisa) if mentor.linhas_pesquisa else "Nao informadas"
-
 		print("\n" + "=" * 70)
 		print(f"DETALHES DO MENTOR: {mentor.nome}")
 		print("=" * 70)
@@ -634,25 +626,24 @@ def exibir_mural_projetos():
 def visualizar_mentor():
 	listar_mentores()
 	if mentores:
-		try:
-			idx = int(input("\nDigite o número do mentor para ver detalhes (ou 0 para voltar): ")) - 1
-			if 0 <= idx < len(mentores):
-				mentor = mentores[idx]
-				print(f"\n=== Detalhes do Mentor: {mentor.nome} ===")
-				print(f"Departamento: {mentor.departamento}")
-				print(f"Linhas de pesquisa: {', '.join(mentor.linhas_pesquisa)}")
-				print(f"Disponibilidade para orientações: {mentor.disponibilidade}")
-				if mentor.email:
-					print(f"Email: {mentor.email}")
-				if mentor.especialidades:
-					print(f"Especialidades técnicas: {', '.join(mentor.especialidades)}")
-				print(f"Total de alunos orientando: {len(mentor.alunos_orientando)}")
-				if mentor.alunos_orientando:
-					print("Alunos:")
-					for aluno in mentor.alunos_orientando:
-						print(f"  - {aluno.nome}")
-		except ValueError:
-			print("Opção inválida.")
+		idx = input_int("\nDigite o número do mentor para ver detalhes (ou 0 para voltar): ", min_value=0, max_value=len(mentores)) - 1
+		if idx == -1:
+			return
+		if 0 <= idx < len(mentores):
+			mentor = mentores[idx]
+			print(f"\n=== Detalhes do Mentor: {mentor.nome} ===")
+			print(f"Departamento: {mentor.departamento}")
+			print(f"Linhas de pesquisa: {', '.join(mentor.linhas_pesquisa)}")
+			print(f"Disponibilidade para orientações: {mentor.disponibilidade}")
+			if mentor.email:
+				print(f"Email: {mentor.email}")
+			if mentor.especialidades:
+				print(f"Especialidades técnicas: {', '.join(mentor.especialidades)}")
+			print(f"Total de alunos orientando: {len(mentor.alunos_orientando)}")
+			if mentor.alunos_orientando:
+				print("Alunos:")
+				for aluno in mentor.alunos_orientando:
+					print(f"  - {aluno.nome}")
 
 
 # Função para exibir o Diretório de Mentores - RF05
