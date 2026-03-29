@@ -48,7 +48,7 @@ class Projeto:
 		self.numero_vagas = numero_vagas
 		self.criador = criador  # pode ser Mentor ou Aluno
 		self.participantes = []  # lista de alunos participantes
-		self.status = "Aberto"  # status do projeto: "Aberto" ou "Fechado"
+		self.status = "Em Formação"  # status do projeto: "Em Formação" ou "Grupo Fechado"
 		self.data_criacao = None  # data de criação do projeto
 		self.interessados = []  # lista de alunos interessados - RF06
 	
@@ -74,14 +74,14 @@ class Projeto:
 		"""Verifica se o projeto está com todas as vagas preenchidas"""
 		return self.vagas_disponiveis() <= 0
 	
-	def fechar_projeto(self):
-		"""Fecha o projeto para novas inscrições"""
-		self.status = "Fechado"
-	
-	def abrir_projeto(self):
-		"""Reabre o projeto para inscrições"""
-		self.status = "Aberto"
-	
+	def marcar_em_formacao(self):
+		"""Marca o projeto como em formação (vagas abertas)"""
+		self.status = "Em Formação"
+
+	def marcar_grupo_fechado(self):
+		"""Marca o projeto como grupo fechado (IC iniciada)"""
+		self.status = "Grupo Fechado"
+
 	def adicionar_interessado(self, aluno):
 		"""Adiciona um aluno à lista de interessados - RF06"""
 		if aluno not in self.interessados:
@@ -91,7 +91,7 @@ class Projeto:
 	
 	def __repr__(self):
 		tipo_criador = "Mentor" if isinstance(self.criador, Mentor) else "Aluno"
-		return f"Projeto(titulo={self.titulo}, resumo={self.resumo_tema[:50]}..., vagas={self.numero_vagas}, criador={tipo_criador} {self.criador.nome})"
+		return f"Projeto(titulo={self.titulo}, resumo={self.resumo_tema[:50]}..., vagas={self.numero_vagas}, status={self.status}, criador={tipo_criador} {self.criador.nome})"
 
 
 # Classe para gerenciar o Mural de Projetos - RF04
@@ -103,51 +103,51 @@ class MuralDeProjetos:
 		"""Define a lista de projetos a ser gerenciada"""
 		self.projetos_lista = projetos_lista
 	
-	def obter_projetos_abertos(self):
-		"""Retorna apenas os projetos com status 'Aberto'"""
-		return [p for p in self.projetos_lista if p.status == "Aberto"]
+	def obter_projetos_em_formacao(self):
+		"""Retorna apenas os projetos com status 'Em Formação'"""
+		return [p for p in self.projetos_lista if p.status == "Em Formação"]
 	
 	def obter_projetos_com_vagas(self):
-		"""Retorna projetos que ainda possuem vagas disponíveis"""
-		return [p for p in self.projetos_lista if p.vagas_disponiveis() > 0 and p.status == "Aberto"]
+		"""Retorna projetos em formação que ainda possuem vagas disponíveis"""
+		return [p for p in self.projetos_lista if p.vagas_disponiveis() > 0 and p.status == "Em Formação"]
 	
 	def filtrar_por_tema(self, palavra_chave):
 		"""Filtra projetos por palavra-chave no título ou resumo"""
 		palavra_chave = palavra_chave.lower()
-		return [p for p in self.obter_projetos_abertos() 
+		return [p for p in self.obter_projetos_em_formacao() 
 				if palavra_chave in p.titulo.lower() or palavra_chave in p.resumo_tema.lower()]
 	
 	def filtrar_por_criador_tipo(self, tipo):
 		"""Filtra projetos por tipo de criador ('Mentor' ou 'Aluno')"""
 		if tipo.lower() == 'mentor':
-			return [p for p in self.obter_projetos_abertos() if isinstance(p.criador, Mentor)]
+			return [p for p in self.obter_projetos_em_formacao() if isinstance(p.criador, Mentor)]
 		elif tipo.lower() == 'aluno':
-			return [p for p in self.obter_projetos_abertos() if isinstance(p.criador, Aluno)]
-		return self.obter_projetos_abertos()
+			return [p for p in self.obter_projetos_em_formacao() if isinstance(p.criador, Aluno)]
+		return self.obter_projetos_em_formacao()
 	
 	def contar_projetos_abertos(self):
-		"""Retorna a quantidade de projetos abertos"""
-		return len(self.obter_projetos_abertos())
+		"""Retorna a quantidade de projetos em formação"""
+		return len(self.obter_projetos_em_formacao())
 	
 	def contar_vagas_totais_disponiveis(self):
-		"""Retorna o total de vagas disponíveis em todos os projetos abertos"""
-		return sum(p.vagas_disponiveis() for p in self.obter_projetos_abertos())
+		"""Retorna o total de vagas disponíveis em todos os projetos em formação"""
+		return sum(p.vagas_disponiveis() for p in self.obter_projetos_em_formacao())
 	
 	def exibir_mural_resumido(self):
 		"""Exibe o mural de projetos de forma resumida e rápida"""
-		projetos_abertos = self.obter_projetos_abertos()
+		projetos_abertos = self.obter_projetos_em_formacao()
 		
 		if not projetos_abertos:
 			print("\n" + "="*70)
-			print("MURAL DE PROJETOS - NENHUM PROJETO ABERTO")
+			print("MURAL DE PROJETOS - NENHUM PROJETO EM FORMAÇÃO")
 			print("="*70)
-			print("Não há projetos de IC abertos no momento.")
+			print("Não há projetos de IC em formação no momento.")
 			return
 		
 		print("\n" + "="*70)
 		print("MURAL DE PROJETOS - RF04")
 		print("="*70)
-		print(f"Total de projetos abertos: {len(projetos_abertos)}")
+		print(f"Total de projetos em formação: {len(projetos_abertos)}")
 		print(f"Total de vagas disponíveis: {self.contar_vagas_totais_disponiveis()}")
 		print("="*70)
 		
@@ -163,11 +163,11 @@ class MuralDeProjetos:
 	
 	def exibir_mural_detalhado(self):
 		"""Exibe o mural de projetos com informações detalhadas"""
-		projetos_abertos = self.obter_projetos_abertos()
+		projetos_abertos = self.obter_projetos_em_formacao()
 		
 		if not projetos_abertos:
 			print("\n" + "="*70)
-			print("MURAL DE PROJETOS - NENHUM PROJETO ABERTO")
+			print("MURAL DE PROJETOS - NENHUM PROJETO EM FORMAÇÃO")
 			print("="*70)
 			return
 		
@@ -493,6 +493,45 @@ def listar_projetos():
 		print(f"   Resumo: {projeto.resumo_tema}")
 		print(f"   Vagas: {projeto.numero_vagas}")
 		print(f"   Participantes: {len(projeto.participantes)}")
+		print(f"   Status: {projeto.status}")
+
+
+def alterar_status_vaga():
+	"""RF08 - Permite ao responsável marcar status do projeto"""
+	if not projetos:
+		print("\nNenhum projeto cadastrado ainda.")
+		return
+	
+	print("\n=== Alterar Status da Vaga (RF08) ===")
+	for idx, projeto in enumerate(projetos, 1):
+		print(f"{idx}. {projeto.titulo} - Status atual: {projeto.status}")
+
+	try:
+		idx = int(input("Escolha o número do projeto para atualizar (0 para voltar): ").strip()) - 1
+		if idx == -1:
+			return
+		if not (0 <= idx < len(projetos)):
+			print("Número inválido.")
+			return
+	except ValueError:
+		print("Entrada inválida.")
+		return
+	
+	projeto = projetos[idx]
+
+	print("\nSelecione o novo status:")
+	print("1. Em Formação (vagas abertas)")
+	print("2. Grupo Fechado (IC iniciada)")
+	status_choice = input("Escolha (1/2): ").strip()
+
+	if status_choice == '1':
+		projeto.marcar_em_formacao()
+		print(f"Status atualizado para 'Em Formação' em '{projeto.titulo}'")
+	elif status_choice == '2':
+		projeto.marcar_grupo_fechado()
+		print(f"Status atualizado para 'Grupo Fechado' em '{projeto.titulo}'")
+	else:
+		print("Opção inválida. Nenhuma alteração feita.")
 
 
 # Função para exibir o Mural de Projetos - RF04
@@ -556,14 +595,14 @@ def exibir_mural_projetos():
 					print(f"    Vagas disponíveis: {projeto.vagas_disponiveis()} de {projeto.numero_vagas}")
 		
 		elif opcao == '5':
-			projetos_abertos = mural.obter_projetos_abertos()
+			projetos_abertos = mural.obter_projetos_em_formacao()
 			projetos_com_vagas = mural.obter_projetos_com_vagas()
 			
 			print("\n" + "="*70)
 			print("ESTATÍSTICAS DO MURAL DE PROJETOS")
 			print("="*70)
 			print(f"Total de projetos publicados: {len(projetos)}")
-			print(f"Total de projetos abertos:    {len(projetos_abertos)}")
+			print(f"Total de projetos em formação: {len(projetos_abertos)}")
 			print(f"Projetos com vagas livres:    {len(projetos_com_vagas)}")
 			print(f"Total de vagas disponíveis:   {mural.contar_vagas_totais_disponiveis()}")
 			
@@ -820,7 +859,8 @@ def menu_principal():
 		print("8. Diretorio de Mentores - RF05")
 		print("9. Manifestar Interesse em Projeto - RF06")
 		print("10. Visualizar Interessados nos Projetos - RF07")
-		print("11. Sair")
+		print("11. Gerenciar Status da Vaga - RF08")
+		print("12. Sair")
 		print("="*50)
 		
 		opcao = input("Escolha uma opcao (1-11): ").strip()
@@ -846,6 +886,8 @@ def menu_principal():
 		elif opcao == '10':
 			visualizar_interessados()
 		elif opcao == '11':
+			alterar_status_vaga()
+		elif opcao == '12':
 			print("\nAté logo! Sistema finalizado.")
 			break
 		else:
