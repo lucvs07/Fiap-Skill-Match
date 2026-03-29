@@ -1,3 +1,31 @@
+# === Utilitários de Validação de Entrada (RNF04) ===
+def input_int(prompt, min_value=None, max_value=None, error_msg="Entrada inválida. Digite um número inteiro."):
+	while True:
+		val = input(prompt).strip()
+		try:
+			num = int(val)
+			if (min_value is not None and num < min_value) or (max_value is not None and num > max_value):
+				print(f"Valor deve estar entre {min_value} e {max_value}. Tente novamente.")
+				continue
+			return num
+		except ValueError:
+			print(error_msg)
+
+def input_nonempty(prompt, error_msg="Campo obrigatório. Não pode ser vazio."):
+	while True:
+		val = input(prompt).strip()
+		if val:
+			return val
+		print(error_msg)
+
+def input_choice(prompt, choices, error_msg="Opção inválida. Tente novamente."):
+	choices_set = set(choices)
+	while True:
+		val = input(prompt).strip()
+		if val in choices_set:
+			return val
+		print(error_msg)
+
 
 # Classe para representar um aluno
 class Aluno:
@@ -26,6 +54,8 @@ class Mentor:
 		"""Adiciona um aluno à lista de orientandos"""
 		if aluno not in self.alunos_orientando:
 			self.alunos_orientando.append(aluno)
+			# Persistência após alteração
+			salvar_dados(alunos, mentores, projetos)
 			return True
 		return False
 	
@@ -33,6 +63,8 @@ class Mentor:
 		"""Remove um aluno da lista de orientandos"""
 		if aluno in self.alunos_orientando:
 			self.alunos_orientando.remove(aluno)
+			# Persistência após alteração
+			salvar_dados(alunos, mentores, projetos)
 			return True
 		return False
 	
@@ -48,7 +80,7 @@ class Projeto:
 		self.numero_vagas = numero_vagas
 		self.criador = criador  # pode ser Mentor ou Aluno
 		self.participantes = []  # lista de alunos participantes
-		self.status = "Aberto"  # status do projeto: "Aberto" ou "Fechado"
+		self.status = "Em Formação"  # status do projeto: "Em Formação" ou "Grupo Fechado"
 		self.data_criacao = None  # data de criação do projeto
 		self.interessados = []  # lista de alunos interessados - RF06
 	
@@ -56,6 +88,8 @@ class Projeto:
 		"""Adiciona um aluno como participante do projeto"""
 		if aluno not in self.participantes:
 			self.participantes.append(aluno)
+			# Persistência após alteração
+			salvar_dados(alunos, mentores, projetos)
 			return True
 		return False
 	
@@ -63,6 +97,8 @@ class Projeto:
 		"""Remove um aluno da lista de participantes"""
 		if aluno in self.participantes:
 			self.participantes.remove(aluno)
+			# Persistência após alteração
+			salvar_dados(alunos, mentores, projetos)
 			return True
 		return False
 	
@@ -74,24 +110,26 @@ class Projeto:
 		"""Verifica se o projeto está com todas as vagas preenchidas"""
 		return self.vagas_disponiveis() <= 0
 	
-	def fechar_projeto(self):
-		"""Fecha o projeto para novas inscrições"""
-		self.status = "Fechado"
-	
-	def abrir_projeto(self):
-		"""Reabre o projeto para inscrições"""
-		self.status = "Aberto"
-	
+	def marcar_em_formacao(self):
+		"""Marca o projeto como em formação (vagas abertas)"""
+		self.status = "Em Formação"
+
+	def marcar_grupo_fechado(self):
+		"""Marca o projeto como grupo fechado (IC iniciada)"""
+		self.status = "Grupo Fechado"
+
 	def adicionar_interessado(self, aluno):
 		"""Adiciona um aluno à lista de interessados - RF06"""
 		if aluno not in self.interessados:
 			self.interessados.append(aluno)
+			# Persistência após alteração
+			salvar_dados(alunos, mentores, projetos)
 			return True
 		return False
 	
 	def __repr__(self):
 		tipo_criador = "Mentor" if isinstance(self.criador, Mentor) else "Aluno"
-		return f"Projeto(titulo={self.titulo}, resumo={self.resumo_tema[:50]}..., vagas={self.numero_vagas}, criador={tipo_criador} {self.criador.nome})"
+		return f"Projeto(titulo={self.titulo}, resumo={self.resumo_tema[:50]}..., vagas={self.numero_vagas}, status={self.status}, criador={tipo_criador} {self.criador.nome})"
 
 
 # Classe para gerenciar o Mural de Projetos - RF04
@@ -103,51 +141,51 @@ class MuralDeProjetos:
 		"""Define a lista de projetos a ser gerenciada"""
 		self.projetos_lista = projetos_lista
 	
-	def obter_projetos_abertos(self):
-		"""Retorna apenas os projetos com status 'Aberto'"""
-		return [p for p in self.projetos_lista if p.status == "Aberto"]
+	def obter_projetos_em_formacao(self):
+		"""Retorna apenas os projetos com status 'Em Formação'"""
+		return [p for p in self.projetos_lista if p.status == "Em Formação"]
 	
 	def obter_projetos_com_vagas(self):
-		"""Retorna projetos que ainda possuem vagas disponíveis"""
-		return [p for p in self.projetos_lista if p.vagas_disponiveis() > 0 and p.status == "Aberto"]
+		"""Retorna projetos em formação que ainda possuem vagas disponíveis"""
+		return [p for p in self.projetos_lista if p.vagas_disponiveis() > 0 and p.status == "Em Formação"]
 	
 	def filtrar_por_tema(self, palavra_chave):
 		"""Filtra projetos por palavra-chave no título ou resumo"""
 		palavra_chave = palavra_chave.lower()
-		return [p for p in self.obter_projetos_abertos() 
+		return [p for p in self.obter_projetos_em_formacao() 
 				if palavra_chave in p.titulo.lower() or palavra_chave in p.resumo_tema.lower()]
 	
 	def filtrar_por_criador_tipo(self, tipo):
 		"""Filtra projetos por tipo de criador ('Mentor' ou 'Aluno')"""
 		if tipo.lower() == 'mentor':
-			return [p for p in self.obter_projetos_abertos() if isinstance(p.criador, Mentor)]
+			return [p for p in self.obter_projetos_em_formacao() if isinstance(p.criador, Mentor)]
 		elif tipo.lower() == 'aluno':
-			return [p for p in self.obter_projetos_abertos() if isinstance(p.criador, Aluno)]
-		return self.obter_projetos_abertos()
+			return [p for p in self.obter_projetos_em_formacao() if isinstance(p.criador, Aluno)]
+		return self.obter_projetos_em_formacao()
 	
 	def contar_projetos_abertos(self):
-		"""Retorna a quantidade de projetos abertos"""
-		return len(self.obter_projetos_abertos())
+		"""Retorna a quantidade de projetos em formação"""
+		return len(self.obter_projetos_em_formacao())
 	
 	def contar_vagas_totais_disponiveis(self):
-		"""Retorna o total de vagas disponíveis em todos os projetos abertos"""
-		return sum(p.vagas_disponiveis() for p in self.obter_projetos_abertos())
+		"""Retorna o total de vagas disponíveis em todos os projetos em formação"""
+		return sum(p.vagas_disponiveis() for p in self.obter_projetos_em_formacao())
 	
 	def exibir_mural_resumido(self):
 		"""Exibe o mural de projetos de forma resumida e rápida"""
-		projetos_abertos = self.obter_projetos_abertos()
+		projetos_abertos = self.obter_projetos_em_formacao()
 		
 		if not projetos_abertos:
 			print("\n" + "="*70)
-			print("MURAL DE PROJETOS - NENHUM PROJETO ABERTO")
+			print("MURAL DE PROJETOS - NENHUM PROJETO EM FORMAÇÃO")
 			print("="*70)
-			print("Não há projetos de IC abertos no momento.")
+			print("Não há projetos de IC em formação no momento.")
 			return
 		
 		print("\n" + "="*70)
 		print("MURAL DE PROJETOS - RF04")
 		print("="*70)
-		print(f"Total de projetos abertos: {len(projetos_abertos)}")
+		print(f"Total de projetos em formação: {len(projetos_abertos)}")
 		print(f"Total de vagas disponíveis: {self.contar_vagas_totais_disponiveis()}")
 		print("="*70)
 		
@@ -163,11 +201,11 @@ class MuralDeProjetos:
 	
 	def exibir_mural_detalhado(self):
 		"""Exibe o mural de projetos com informações detalhadas"""
-		projetos_abertos = self.obter_projetos_abertos()
+		projetos_abertos = self.obter_projetos_em_formacao()
 		
 		if not projetos_abertos:
 			print("\n" + "="*70)
-			print("MURAL DE PROJETOS - NENHUM PROJETO ABERTO")
+			print("MURAL DE PROJETOS - NENHUM PROJETO EM FORMAÇÃO")
 			print("="*70)
 			return
 		
@@ -284,24 +322,16 @@ class DiretorioMentores:
 			return
 
 		self.exibir_diretorio_resumido()
-		try:
-			opcao = int(input("\nDigite o numero do mentor para ver contato (0 para voltar): ").strip())
-		except ValueError:
-			print("Entrada invalida.")
-			return
-
+		opcao = input_int("\nDigite o numero do mentor para ver contato (0 para voltar): ", min_value=0, max_value=len(mentores_disponiveis))
 		if opcao == 0:
 			return
-
 		idx = opcao - 1
 		if not (0 <= idx < len(mentores_disponiveis)):
 			print("Numero invalido.")
 			return
-
 		mentor = mentores_disponiveis[idx]
 		especialidades = ", ".join(mentor.especialidades) if mentor.especialidades else "Nao informadas"
 		linhas = ", ".join(mentor.linhas_pesquisa) if mentor.linhas_pesquisa else "Nao informadas"
-
 		print("\n" + "=" * 70)
 		print(f"DETALHES DO MENTOR: {mentor.nome}")
 		print("=" * 70)
@@ -313,10 +343,100 @@ class DiretorioMentores:
 		print("=" * 70)
 
 
-# Listas para armazenar os usuários cadastrados
-alunos = []
-mentores = []
-projetos = []
+
+
+# ===== Persistência de Dados Local (JSON) =====
+import json
+import os
+
+ARQ_ALUNOS = 'alunos.json'
+ARQ_MENTORES = 'mentores.json'
+ARQ_PROJETOS = 'projetos.json'
+
+def carregar_dados():
+	alunos, mentores, projetos = [], [], []
+	# Carregar alunos
+	if os.path.exists(ARQ_ALUNOS):
+		with open(ARQ_ALUNOS, 'r', encoding='utf-8') as f:
+			try:
+				alunos_data = json.load(f)
+			except Exception:
+				alunos_data = []
+			alunos = [Aluno(a['nome'], a['curso'], a['areas_interesse'], a.get('habilidades_tecnicas', [])) for a in alunos_data]
+	# Carregar mentores
+	if os.path.exists(ARQ_MENTORES):
+		with open(ARQ_MENTORES, 'r', encoding='utf-8') as f:
+			try:
+				mentores_data = json.load(f)
+			except Exception:
+				mentores_data = []
+			mentores = [Mentor(m['nome'], m['departamento'], m['linhas_pesquisa'], m['disponibilidade'], m.get('email'), m.get('especialidades', [])) for m in mentores_data]
+	# Carregar projetos
+	if os.path.exists(ARQ_PROJETOS):
+		with open(ARQ_PROJETOS, 'r', encoding='utf-8') as f:
+			try:
+				projetos_data = json.load(f)
+			except Exception:
+				projetos_data = []
+			# Mapear criadores e participantes por nome
+			nome_aluno = {a.nome: a for a in alunos}
+			nome_mentor = {m.nome: m for m in mentores}
+			for p in projetos_data:
+				if p['criador_tipo'] == 'Mentor':
+					criador = nome_mentor.get(p['criador_nome'])
+				else:
+					criador = nome_aluno.get(p['criador_nome'])
+				projeto = Projeto(p['titulo'], p['resumo_tema'], p['numero_vagas'], criador)
+				projeto.status = p.get('status', 'Em Formação')
+				projeto.data_criacao = p.get('data_criacao')
+				projeto.participantes = [nome_aluno[n] for n in p.get('participantes', []) if n in nome_aluno]
+				projeto.interessados = [nome_aluno[n] for n in p.get('interessados', []) if n in nome_aluno]
+				projetos.append(projeto)
+	# Atualizar alunos_orientando dos mentores
+	if os.path.exists(ARQ_MENTORES):
+		with open(ARQ_MENTORES, 'r', encoding='utf-8') as f:
+			mentores_data = json.load(f)
+			nome_aluno = {a.nome: a for a in alunos}
+			for m, mdata in zip(mentores, mentores_data):
+				m.alunos_orientando = [nome_aluno[n] for n in mdata.get('alunos_orientando', []) if n in nome_aluno]
+	return alunos, mentores, projetos
+
+def salvar_dados(alunos, mentores, projetos):
+	with open(ARQ_ALUNOS, 'w', encoding='utf-8') as f:
+		json.dump([{
+			'nome': a.nome,
+			'curso': a.curso,
+			'areas_interesse': a.areas_interesse,
+			'habilidades_tecnicas': a.habilidades_tecnicas
+		} for a in alunos], f, ensure_ascii=False, indent=2)
+
+	with open(ARQ_MENTORES, 'w', encoding='utf-8') as f:
+		json.dump([{
+			'nome': m.nome,
+			'departamento': m.departamento,
+			'linhas_pesquisa': m.linhas_pesquisa,
+			'disponibilidade': m.disponibilidade,
+			'email': m.email,
+			'especialidades': m.especialidades,
+			'alunos_orientando': [a.nome for a in m.alunos_orientando]
+		} for m in mentores], f, ensure_ascii=False, indent=2)
+
+	with open(ARQ_PROJETOS, 'w', encoding='utf-8') as f:
+		json.dump([{
+			'titulo': p.titulo,
+			'resumo_tema': p.resumo_tema,
+			'numero_vagas': p.numero_vagas,
+			'criador_tipo': 'Mentor' if isinstance(p.criador, Mentor) else 'Aluno',
+			'criador_nome': p.criador.nome,
+			'participantes': [a.nome for a in p.participantes],
+			'status': p.status,
+			'data_criacao': p.data_criacao,
+			'interessados': [a.nome for a in p.interessados]
+		} for p in projetos], f, ensure_ascii=False, indent=2)
+
+
+# Carregar dados persistentes
+alunos, mentores, projetos = carregar_dados()
 
 # Instância do Mural de Projetos - RF04
 mural = MuralDeProjetos()
@@ -330,44 +450,38 @@ diretorio_mentores.definir_mentores(mentores)
 # Função para cadastrar um novo aluno
 def cadastrar_aluno():
 	print("\n=== Cadastro de Aluno ===")
-	nome = input("Nome: ")
-	curso = input("Curso: ")
-	areas = input("Áreas de interesse (separadas por vírgula): ")
+	nome = input_nonempty("Nome: ")
+	curso = input_nonempty("Curso: ")
+	areas = input_nonempty("Áreas de interesse (separadas por vírgula): ")
 	areas_interesse = [a.strip() for a in areas.split(',') if a.strip()]
-	
 	habilidades = input("Habilidades técnicas/Stacks (separadas por vírgula): ")
 	habilidades_tecnicas = [h.strip() for h in habilidades.split(',') if h.strip()]
-	
 	aluno = Aluno(nome, curso, areas_interesse, habilidades_tecnicas)
 	alunos.append(aluno)
+	salvar_dados(alunos, mentores, projetos)
 	print(f"✓ Aluno cadastrado com sucesso: {aluno.nome}")
 
 
 # Função para cadastrar um novo mentor - RF02
 def cadastrar_mentor():
 	print("\n=== Cadastro de Mentor (Professor) - RF02 ===")
-	nome = input("Nome completo: ")
-	departamento = input("Departamento: ")
-	
-	linhas = input("Linhas de pesquisa (separadas por vírgula): ")
+	nome = input_nonempty("Nome completo: ")
+	departamento = input_nonempty("Departamento: ")
+	linhas = input_nonempty("Linhas de pesquisa (separadas por vírgula): ")
 	linhas_pesquisa = [l.strip() for l in linhas.split(',') if l.strip()]
-	
 	print("Indique sua disponibilidade para orientar ICs:")
 	print("1. Alta (disponível para múltiplas orientações)")
 	print("2. Média (disponível para algumas orientações)")
 	print("3. Baixa (disponível para poucas orientações)")
-	disponibilidade_escolha = input("Escolha (1/2/3): ").strip()
-	
+	disponibilidade_escolha = input_choice("Escolha (1/2/3): ", ['1', '2', '3'])
 	disponibilidade_map = {'1': 'Alta', '2': 'Média', '3': 'Baixa'}
-	disponibilidade = disponibilidade_map.get(disponibilidade_escolha, 'Média')
-	
+	disponibilidade = disponibilidade_map[disponibilidade_escolha]
 	email = input("Email (opcional): ").strip() or None
-	
 	especialidades = input("Especialidades técnicas (separadas por vírgula, opcional): ")
 	especialidades_lista = [e.strip() for e in especialidades.split(',') if e.strip()]
-	
 	mentor = Mentor(nome, departamento, linhas_pesquisa, disponibilidade, email, especialidades_lista)
 	mentores.append(mentor)
+	salvar_dados(alunos, mentores, projetos)
 	print(f"✓ Mentor cadastrado com sucesso: {mentor.nome}")
 	print(f"  Disponibilidade: {mentor.disponibilidade}")
 	print(f"  Linhas de pesquisa: {', '.join(mentor.linhas_pesquisa)}")
@@ -376,71 +490,36 @@ def cadastrar_mentor():
 # Função para publicar uma oportunidade de IC (criar card de projeto) - RF03
 def publicar_projeto():
 	print("\n=== Publicação de Oportunidade de IC - RF03 ===")
-	
+    
 	# Escolher o tipo de criador
 	print("Quem está criando o projeto?")
 	print("1. Mentor (Professor)")
 	print("2. Aluno Proponente")
-	tipo_criador = input("Escolha (1/2): ").strip()
-	
+	tipo_criador = input_choice("Escolha (1/2): ", ['1', '2'])
 	criador = None
 	if tipo_criador == '1':
 		if not mentores:
 			print("Nenhum mentor cadastrado. Cadastre um mentor primeiro.")
 			return
 		listar_mentores()
-		try:
-			idx = int(input("Digite o número do mentor criador: ")) - 1
-			if 0 <= idx < len(mentores):
-				criador = mentores[idx]
-			else:
-				print("Número inválido.")
-				return
-		except ValueError:
-			print("Entrada inválida.")
-			return
-	elif tipo_criador == '2':
+		idx = input_int("Digite o número do mentor criador: ", min_value=1, max_value=len(mentores)) - 1
+		criador = mentores[idx]
+	else:
 		if not alunos:
 			print("Nenhum aluno cadastrado. Cadastre um aluno primeiro.")
 			return
 		listar_alunos()
-		try:
-			idx = int(input("Digite o número do aluno proponente: ")) - 1
-			if 0 <= idx < len(alunos):
-				criador = alunos[idx]
-			else:
-				print("Número inválido.")
-				return
-		except ValueError:
-			print("Entrada inválida.")
-			return
-	else:
-		print("Opção inválida.")
-		return
-	
+		idx = input_int("Digite o número do aluno proponente: ", min_value=1, max_value=len(alunos)) - 1
+		criador = alunos[idx]
 	# Coletar informações do projeto
-	titulo = input("Título do projeto: ").strip()
-	if not titulo:
-		print("Título é obrigatório.")
-		return
-	
-	resumo_tema = input("Resumo do tema: ").strip()
-	if not resumo_tema:
-		print("Resumo é obrigatório.")
-		return
-	
-	try:
-		numero_vagas = int(input("Número de vagas para o grupo: ").strip())
-		if numero_vagas <= 0:
-			print("Número de vagas deve ser positivo.")
-			return
-	except ValueError:
-		print("Número de vagas deve ser um inteiro.")
-		return
-	
+	titulo = input_nonempty("Título do projeto: ")
+	resumo_tema = input_nonempty("Resumo do tema: ")
+	numero_vagas = input_int("Número de vagas para o grupo: ", min_value=1)
+    
 	# Criar o projeto
 	projeto = Projeto(titulo, resumo_tema, numero_vagas, criador)
 	projetos.append(projeto)
+	salvar_dados(alunos, mentores, projetos)
 	print(f"✓ Projeto publicado com sucesso: '{projeto.titulo}'")
 	print(f"  Criado por: {criador.nome} ({'Mentor' if isinstance(criador, Mentor) else 'Aluno'})")
 	print(f"  Vagas: {projeto.numero_vagas}")
@@ -493,6 +572,45 @@ def listar_projetos():
 		print(f"   Resumo: {projeto.resumo_tema}")
 		print(f"   Vagas: {projeto.numero_vagas}")
 		print(f"   Participantes: {len(projeto.participantes)}")
+		print(f"   Status: {projeto.status}")
+
+
+def alterar_status_vaga():
+	"""RF08 - Permite ao responsável marcar status do projeto"""
+	if not projetos:
+		print("\nNenhum projeto cadastrado ainda.")
+		return
+	
+	print("\n=== Alterar Status da Vaga (RF08) ===")
+	for idx, projeto in enumerate(projetos, 1):
+		print(f"{idx}. {projeto.titulo} - Status atual: {projeto.status}")
+
+	try:
+		idx = int(input("Escolha o número do projeto para atualizar (0 para voltar): ").strip()) - 1
+		if idx == -1:
+			return
+		if not (0 <= idx < len(projetos)):
+			print("Número inválido.")
+			return
+	except ValueError:
+		print("Entrada inválida.")
+		return
+	
+	projeto = projetos[idx]
+
+	print("\nSelecione o novo status:")
+	print("1. Em Formação (vagas abertas)")
+	print("2. Grupo Fechado (IC iniciada)")
+	status_choice = input("Escolha (1/2): ").strip()
+
+	if status_choice == '1':
+		projeto.marcar_em_formacao()
+		print(f"Status atualizado para 'Em Formação' em '{projeto.titulo}'")
+	elif status_choice == '2':
+		projeto.marcar_grupo_fechado()
+		print(f"Status atualizado para 'Grupo Fechado' em '{projeto.titulo}'")
+	else:
+		print("Opção inválida. Nenhuma alteração feita.")
 
 
 # Função para exibir o Mural de Projetos - RF04
@@ -510,7 +628,7 @@ def exibir_mural_projetos():
 		print("6. Voltar ao menu principal")
 		print("="*70)
 		
-		opcao = input("Escolha uma opção (1-6): ").strip()
+		opcao = input_choice("Escolha uma opção (1-6): ", [str(i) for i in range(1, 7)])
 		
 		if opcao == '1':
 			mural.exibir_mural_resumido()
@@ -519,28 +637,20 @@ def exibir_mural_projetos():
 			mural.exibir_mural_detalhado()
 		
 		elif opcao == '3':
-			palavra_chave = input("\nDigite a palavra-chave para buscar: ").strip()
-			if palavra_chave:
-				mural.exibir_mural_com_filtro(palavra_chave)
-			else:
-				print("Palavra-chave vazia. Tente novamente.")
+			palavra_chave = input_nonempty("\nDigite a palavra-chave para buscar: ")
+			mural.exibir_mural_com_filtro(palavra_chave)
 		
 		elif opcao == '4':
 			print("\nFiltrar por tipo de criador:")
 			print("1. Projetos de Mentores")
 			print("2. Projetos de Alunos")
-			tipo_escolha = input("Escolha (1/2): ").strip()
-			
+			tipo_escolha = input_choice("Escolha (1/2): ", ['1', '2'])
 			if tipo_escolha == '1':
 				projetos_filtrados = mural.filtrar_por_criador_tipo('Mentor')
 				tipo_nome = "Mentores"
-			elif tipo_escolha == '2':
+			else:
 				projetos_filtrados = mural.filtrar_por_criador_tipo('Aluno')
 				tipo_nome = "Alunos"
-			else:
-				print("Opção inválida.")
-				continue
-			
 			if not projetos_filtrados:
 				print(f"\nNenhum projeto de {tipo_nome} disponível.")
 			else:
@@ -548,7 +658,6 @@ def exibir_mural_projetos():
 				print(f"PROJETOS DE {tipo_nome.upper()}")
 				print(f"Total: {len(projetos_filtrados)} projeto(s)")
 				print(f"{'='*70}")
-				
 				for idx, projeto in enumerate(projetos_filtrados, 1):
 					print(f"\n[{idx}] {projeto.titulo}")
 					print(f"    Criador: {projeto.criador.nome}")
@@ -556,14 +665,14 @@ def exibir_mural_projetos():
 					print(f"    Vagas disponíveis: {projeto.vagas_disponiveis()} de {projeto.numero_vagas}")
 		
 		elif opcao == '5':
-			projetos_abertos = mural.obter_projetos_abertos()
+			projetos_abertos = mural.obter_projetos_em_formacao()
 			projetos_com_vagas = mural.obter_projetos_com_vagas()
 			
 			print("\n" + "="*70)
 			print("ESTATÍSTICAS DO MURAL DE PROJETOS")
 			print("="*70)
 			print(f"Total de projetos publicados: {len(projetos)}")
-			print(f"Total de projetos abertos:    {len(projetos_abertos)}")
+			print(f"Total de projetos em formação: {len(projetos_abertos)}")
 			print(f"Projetos com vagas livres:    {len(projetos_com_vagas)}")
 			print(f"Total de vagas disponíveis:   {mural.contar_vagas_totais_disponiveis()}")
 			
@@ -588,25 +697,24 @@ def exibir_mural_projetos():
 def visualizar_mentor():
 	listar_mentores()
 	if mentores:
-		try:
-			idx = int(input("\nDigite o número do mentor para ver detalhes (ou 0 para voltar): ")) - 1
-			if 0 <= idx < len(mentores):
-				mentor = mentores[idx]
-				print(f"\n=== Detalhes do Mentor: {mentor.nome} ===")
-				print(f"Departamento: {mentor.departamento}")
-				print(f"Linhas de pesquisa: {', '.join(mentor.linhas_pesquisa)}")
-				print(f"Disponibilidade para orientações: {mentor.disponibilidade}")
-				if mentor.email:
-					print(f"Email: {mentor.email}")
-				if mentor.especialidades:
-					print(f"Especialidades técnicas: {', '.join(mentor.especialidades)}")
-				print(f"Total de alunos orientando: {len(mentor.alunos_orientando)}")
-				if mentor.alunos_orientando:
-					print("Alunos:")
-					for aluno in mentor.alunos_orientando:
-						print(f"  - {aluno.nome}")
-		except ValueError:
-			print("Opção inválida.")
+		idx = input_int("\nDigite o número do mentor para ver detalhes (ou 0 para voltar): ", min_value=0, max_value=len(mentores)) - 1
+		if idx == -1:
+			return
+		if 0 <= idx < len(mentores):
+			mentor = mentores[idx]
+			print(f"\n=== Detalhes do Mentor: {mentor.nome} ===")
+			print(f"Departamento: {mentor.departamento}")
+			print(f"Linhas de pesquisa: {', '.join(mentor.linhas_pesquisa)}")
+			print(f"Disponibilidade para orientações: {mentor.disponibilidade}")
+			if mentor.email:
+				print(f"Email: {mentor.email}")
+			if mentor.especialidades:
+				print(f"Especialidades técnicas: {', '.join(mentor.especialidades)}")
+			print(f"Total de alunos orientando: {len(mentor.alunos_orientando)}")
+			if mentor.alunos_orientando:
+				print("Alunos:")
+				for aluno in mentor.alunos_orientando:
+					print(f"  - {aluno.nome}")
 
 
 # Função para exibir o Diretório de Mentores - RF05
@@ -622,17 +730,13 @@ def exibir_diretorio_mentores():
 		print("4. Voltar ao menu principal")
 		print("=" * 70)
 
-		opcao = input("Escolha uma opcao (1-4): ").strip()
+		opcao = input_choice("Escolha uma opcao (1-4): ", [str(i) for i in range(1, 5)])
 
 		if opcao == '1':
 			diretorio_mentores.exibir_diretorio_resumido()
 
 		elif opcao == '2':
-			palavra_chave = input("\nDigite a especialidade para buscar: ").strip()
-			if not palavra_chave:
-				print("Especialidade vazia. Tente novamente.")
-				continue
-
+			palavra_chave = input_nonempty("\nDigite a especialidade para buscar: ")
 			mentores_filtrados = diretorio_mentores.filtrar_por_especialidade(palavra_chave)
 			print("\n" + "=" * 70)
 			print(f"RESULTADOS DA BUSCA - ESPECIALIDADE: {palavra_chave}")
@@ -718,6 +822,92 @@ def manifestar_interesse():
 		print("Você já manifestou interesse neste projeto.")
 
 
+# Função para visualizar interessados nos projetos - RF07
+def visualizar_interessados():
+	print("\n=== Visualizar Interessados nos Projetos - RF07 ===")
+	
+	if not projetos:
+		print("Nenhum projeto publicado ainda.")
+		return
+	
+	# Escolher tipo de criador
+	print("Quem está visualizando os interessados?")
+	print("1. Mentor (Professor)")
+	print("2. Aluno Proponente")
+	tipo_criador = input("Escolha (1/2): ").strip()
+	
+	criadores = []
+	if tipo_criador == '1':
+		if not mentores:
+			print("Nenhum mentor cadastrado.")
+			return
+		criadores = mentores
+		tipo_nome = "Mentor"
+	elif tipo_criador == '2':
+		if not alunos:
+			print("Nenhum aluno cadastrado.")
+			return
+		criadores = alunos
+		tipo_nome = "Aluno"
+	else:
+		print("Opção inválida.")
+		return
+	
+	# Listar criadores
+	print(f"\n{tipo_nome}s disponíveis:")
+	for idx, criador in enumerate(criadores, 1):
+		print(f"{idx}. {criador.nome}")
+	
+	try:
+		idx_criador = int(input(f"Digite o número do {tipo_nome.lower()}: ")) - 1
+		if not (0 <= idx_criador < len(criadores)):
+			print("Número inválido.")
+			return
+		criador = criadores[idx_criador]
+	except ValueError:
+		print("Entrada inválida.")
+		return
+	
+	# Listar projetos do criador
+	projetos_criador = [p for p in projetos if p.criador == criador]
+	if not projetos_criador:
+		print(f"Nenhum projeto criado por {criador.nome}.")
+		return
+	
+	print(f"\nProjetos criados por {criador.nome}:")
+	for idx, projeto in enumerate(projetos_criador, 1):
+		print(f"{idx}. {projeto.titulo} - Status: {projeto.status} - Interessados: {len(projeto.interessados)}")
+	
+	try:
+		idx_projeto = int(input("Digite o número do projeto: ")) - 1
+		if not (0 <= idx_projeto < len(projetos_criador)):
+			print("Número inválido.")
+			return
+		projeto = projetos_criador[idx_projeto]
+	except ValueError:
+		print("Entrada inválida.")
+		return
+	
+	# Mostrar interessados
+	if not projeto.interessados:
+		print(f"\nNenhum aluno manifestou interesse em '{projeto.titulo}' ainda.")
+		return
+	
+	print(f"\n{'='*70}")
+	print(f"ALUNOS INTERESSADOS EM: {projeto.titulo}")
+	print(f"Total: {len(projeto.interessados)} aluno(s)")
+	print(f"{'='*70}")
+	
+	for idx, aluno in enumerate(projeto.interessados, 1):
+		print(f"\n--- Aluno #{idx}: {aluno.nome} ---")
+		print(f"Curso: {aluno.curso}")
+		print(f"Áreas de interesse: {', '.join(aluno.areas_interesse)}")
+		print(f"Habilidades técnicas: {', '.join(aluno.habilidades_tecnicas)}")
+		print("---")
+	
+	print(f"\n{'='*70}")
+
+
 # Menu principal
 def menu_principal():
 	while True:
@@ -733,10 +923,12 @@ def menu_principal():
 		print("7. Mural de Projetos - RF04")
 		print("8. Diretorio de Mentores - RF05")
 		print("9. Manifestar Interesse em Projeto - RF06")
-		print("10. Sair")
+		print("10. Visualizar Interessados nos Projetos - RF07")
+		print("11. Gerenciar Status da Vaga - RF08")
+		print("12. Sair")
 		print("="*50)
 		
-		opcao = input("Escolha uma opcao (1-10): ").strip()
+		opcao = input_choice("Escolha uma opcao (1-12): ", [str(i) for i in range(1, 13)])
 		
 		if opcao == '1':
 			cadastrar_aluno()
@@ -757,6 +949,10 @@ def menu_principal():
 		elif opcao == '9':
 			manifestar_interesse()
 		elif opcao == '10':
+			visualizar_interessados()
+		elif opcao == '11':
+			alterar_status_vaga()
+		elif opcao == '12':
 			print("\nAté logo! Sistema finalizado.")
 			break
 		else:
