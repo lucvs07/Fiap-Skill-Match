@@ -44,7 +44,7 @@ O Fiap Skill Match é um sistema que conecta alunos e mentores, facilitando a pu
 
 ## 📸 Demonstração (prints / GIFs / link para vídeo)
 
-> Adicione aqui prints de tela, GIFs ou links para vídeos demonstrando o funcionamento do sistema.
+- [Vídeo de apresentação](https://www.youtube.com/watch?v=Sdnw7jtl4P0)
 
 ## 👨‍💻 Integrantes do Grupo
 
