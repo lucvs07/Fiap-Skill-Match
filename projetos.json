@@ -1,0 +1,26 @@
+[
+  {
+    "titulo": "Agente de IA para Médicos",
+    "resumo_tema": "Aplicar inteligência artificial em sistema de software para médicos",
+    "numero_vagas": 5,
+    "criador_tipo": "Mentor",
+    "criador_nome": "Hercules",
+    "participantes": [],
+    "status": "Em Formação",
+    "data_criacao": null,
+    "interessados": [
+      "Lucas"
+    ]
+  },
+  {
+    "titulo": "Gerenciador de Finanças Pessoais",
+    "resumo_tema": "Aplicar Inteligência Artificial para organizar e administrar aspectos financeiros pessoais",
+    "numero_vagas": 5,
+    "criador_tipo": "Aluno",
+    "criador_nome": "Lucas",
+    "participantes": [],
+    "status": "Em Formação",
+    "data_criacao": null,
+    "interessados": []
+  }
+]

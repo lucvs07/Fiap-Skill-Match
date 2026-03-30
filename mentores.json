@@ -1,0 +1,16 @@
+[
+  {
+    "nome": "Hercules",
+    "departamento": "Engenharia",
+    "linhas_pesquisa": [
+      "Softwares Medicinais"
+    ],
+    "disponibilidade": "Baixa",
+    "email": "hercules@gmail.com",
+    "especialidades": [
+      "Python",
+      "Java"
+    ],
+    "alunos_orientando": []
+  }
+]
