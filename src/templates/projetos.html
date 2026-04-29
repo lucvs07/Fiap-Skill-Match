@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h2 class="mb-0">Mural de Projetos</h2>
+  <a href="{{ url_for('projetos.novo_projeto') }}" class="btn btn-danger btn-sm">+ Publicar projeto</a>
+</div>
+
+{# filtros #}
+<form method="GET" class="row g-2 mb-4">
+  <div class="col-md-6">
+    <input type="text" name="busca" class="form-control form-control-sm"
+           placeholder="Buscar por título ou tema..." value="{{ busca }}">
+  </div>
+  <div class="col-md-4">
+    <select name="status" class="form-select form-select-sm">
+      <option value="">Todos os status</option>
+      <option value="{{ STATUS_EM_FORMACAO }}" {% if status_filtro == STATUS_EM_FORMACAO %}selected{% endif %}>
+        Em Formação
+      </option>
+      <option value="{{ STATUS_GRUPO_FECHADO }}" {% if status_filtro == STATUS_GRUPO_FECHADO %}selected{% endif %}>
+        Grupo Fechado
+      </option>
+    </select>
+  </div>
+  <div class="col-md-2">
+    <button type="submit" class="btn btn-outline-secondary btn-sm w-100">Filtrar</button>
+  </div>
+</form>
+
+{# lista de projetos #}
+{% if projetos %}
+<div class="row g-3">
+  {% for p in projetos %}
+  {% set idx = loop.index0 %}
+  {% set vagas = p.numero_vagas - p.participantes|length %}
+  <div class="col-md-6">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-start mb-1">
+          <h5 class="card-title mb-0">{{ p.titulo }}</h5>
+          {% if p.status == STATUS_EM_FORMACAO %}
+            <span class="badge bg-success ms-2 text-nowrap">{{ p.status }}</span>
+          {% else %}
+            <span class="badge bg-secondary ms-2 text-nowrap">{{ p.status }}</span>
+          {% endif %}
+        </div>
+        <p class="card-text text-muted small mt-2">{{ p.resumo_tema }}</p>
+        <div class="d-flex justify-content-between align-items-center mt-3">
+          <small class="text-muted">
+            por <strong>{{ p.criador_nome }}</strong> ({{ p.criador_tipo }})
+            &nbsp;·&nbsp;
+            <strong>{{ vagas }}</strong> vaga{% if vagas != 1 %}s{% endif %} disponível{% if vagas != 1 %}eis{% endif %}
+            &nbsp;·&nbsp;
+            <strong>{{ p.interessados|length }}</strong> interessado{% if p.interessados|length != 1 %}s{% endif %}
+          </small>
+          {% if session.tipo == 'aluno' and p.status == STATUS_EM_FORMACAO %}
+            {% set ja_interessado = session.nome in p.interessados %}
+            {% set ja_participa = session.nome in p.participantes %}
+            <form method="POST" action="{{ url_for('projetos.manifestar_interesse', idx=idx) }}" class="ms-2">
+              <button type="submit" class="btn btn-sm {% if ja_interessado or ja_participa %}btn-outline-secondary disabled{% else %}btn-outline-danger{% endif %}"
+                      {% if ja_interessado or ja_participa %}disabled{% endif %}>
+                {% if ja_participa %}Participante
+                {% elif ja_interessado %}Interesse registrado
+                {% else %}Tenho interesse
+                {% endif %}
+              </button>
+            </form>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="text-center text-muted py-5">
+  <p class="mb-1">Nenhum projeto encontrado.</p>
+  {% if busca or status_filtro %}
+  <a href="{{ url_for('projetos.mural') }}" class="btn btn-sm btn-outline-secondary mt-2">Limpar filtros</a>
+  {% else %}
+  <a href="{{ url_for('projetos.novo_projeto') }}" class="btn btn-sm btn-outline-danger mt-2">Publicar o primeiro projeto</a>
+  {% endif %}
+</div>
+{% endif %}
+
+{% endblock %}

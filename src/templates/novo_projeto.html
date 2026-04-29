@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="row justify-content-center">
+  <div class="col-md-7">
+    <div class="d-flex align-items-center mb-4">
+      <a href="{{ url_for('projetos.mural') }}" class="btn btn-sm btn-outline-secondary me-3">← Voltar</a>
+      <h2 class="mb-0">Publicar Projeto</h2>
+    </div>
+    <div class="card border-0 shadow-sm">
+      <div class="card-body p-4">
+        <form method="POST">
+          <div class="mb-3">
+            <label class="form-label">Título do projeto</label>
+            <input type="text" name="titulo" class="form-control" required autofocus
+                   placeholder="ex: Agente de IA para diagnóstico médico"
+                   value="{{ request.form.get('titulo', '') }}">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Resumo do tema</label>
+            <textarea name="resumo_tema" class="form-control" rows="4" required
+                      placeholder="Descreva brevemente o objetivo e contexto do projeto...">{{ request.form.get('resumo_tema', '') }}</textarea>
+          </div>
+          <div class="mb-4">
+            <label class="form-label">Número de vagas</label>
+            <input type="number" name="numero_vagas" class="form-control" min="1" max="20"
+                   style="max-width: 120px"
+                   value="{{ request.form.get('numero_vagas', '3') }}" required>
+          </div>
+          <button type="submit" class="btn btn-danger">Publicar</button>
+          <a href="{{ url_for('projetos.mural') }}" class="btn btn-outline-secondary ms-2">Cancelar</a>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
