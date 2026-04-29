@@ -1,0 +1,8 @@
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.env
+src/data/usuarios.json
+instance/
+.flask_session/
