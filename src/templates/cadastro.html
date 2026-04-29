@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="row justify-content-center mt-5">
+  <div class="col-md-5">
+    <div class="card shadow-sm border-0">
+      <div class="card-body p-4">
+        <h2 class="card-title text-center mb-4 text-danger fw-bold">Criar Conta</h2>
+        <form method="POST">
+          <div class="mb-3">
+            <label class="form-label">Nome completo</label>
+            <input type="text" name="nome" class="form-control" required autofocus>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">E-mail</label>
+            <input type="email" name="email" class="form-control" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">
+              Senha <small class="text-muted">(mínimo 8 caracteres)</small>
+            </label>
+            <input type="password" name="senha" class="form-control" required minlength="8">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Tipo de usuário</label>
+            <select name="tipo" class="form-select">
+              <option value="aluno">Aluno</option>
+              <option value="mentor">Mentor</option>
+            </select>
+          </div>
+          <button type="submit" class="btn btn-danger w-100">Cadastrar</button>
+        </form>
+        <p class="text-center mt-3 mb-0 small">
+          Já tem conta? <a href="{{ url_for('login.login') }}">Entrar</a>
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
