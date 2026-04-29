@@ -1,18 +1,22 @@
 {% extends 'base.html' %}
 {% block content %}
-<div class="row justify-content-center mt-5">
-  <div class="col-md-5">
+<div class="row justify-content-center mt-4">
+  <div class="col-md-6">
     <div class="card shadow-sm border-0">
       <div class="card-body p-4">
         <h2 class="card-title text-center mb-4 text-danger fw-bold">Criar Conta</h2>
-        <form method="POST">
+        <form method="POST" novalidate>
+
+          {# campos comuns #}
           <div class="mb-3">
             <label class="form-label">Nome completo</label>
-            <input type="text" name="nome" class="form-control" required autofocus>
+            <input type="text" name="nome" class="form-control" required autofocus
+                   value="{{ request.form.get('nome', '') }}">
           </div>
           <div class="mb-3">
             <label class="form-label">E-mail</label>
-            <input type="email" name="email" class="form-control" required>
+            <input type="email" name="email" class="form-control" required
+                   value="{{ request.form.get('email', '') }}">
           </div>
           <div class="mb-3">
             <label class="form-label">
@@ -20,14 +24,70 @@
             </label>
             <input type="password" name="senha" class="form-control" required minlength="8">
           </div>
+
           <div class="mb-3">
             <label class="form-label">Tipo de usuário</label>
-            <select name="tipo" class="form-select">
-              <option value="aluno">Aluno</option>
-              <option value="mentor">Mentor</option>
+            <select name="tipo" id="tipo" class="form-select" onchange="alternarCampos()">
+              <option value="aluno" {% if request.form.get('tipo','aluno')=='aluno' %}selected{% endif %}>Aluno</option>
+              <option value="mentor" {% if request.form.get('tipo')=='mentor' %}selected{% endif %}>Mentor</option>
             </select>
           </div>
-          <button type="submit" class="btn btn-danger w-100">Cadastrar</button>
+
+          {# campos de aluno #}
+          <div id="campos-aluno">
+            <hr class="my-3">
+            <p class="text-muted small mb-2">Para listas, separe os itens por vírgula.</p>
+            <div class="mb-3">
+              <label class="form-label">Curso</label>
+              <input type="text" name="curso" class="form-control" placeholder="ex: Engenharia da Computação"
+                     value="{{ request.form.get('curso', '') }}">
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Áreas de interesse</label>
+              <input type="text" name="areas_interesse" class="form-control"
+                     placeholder="ex: Inteligência Artificial, Finanças"
+                     value="{{ request.form.get('areas_interesse', '') }}">
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Habilidades técnicas</label>
+              <input type="text" name="habilidades_tecnicas" class="form-control"
+                     placeholder="ex: Python, Java, SQL"
+                     value="{{ request.form.get('habilidades_tecnicas', '') }}">
+            </div>
+          </div>
+
+          {# campos de mentor #}
+          <div id="campos-mentor" style="display:none">
+            <hr class="my-3">
+            <p class="text-muted small mb-2">Para listas, separe os itens por vírgula.</p>
+            <div class="mb-3">
+              <label class="form-label">Departamento</label>
+              <input type="text" name="departamento" class="form-control" placeholder="ex: Engenharia"
+                     value="{{ request.form.get('departamento', '') }}">
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Linhas de pesquisa</label>
+              <input type="text" name="linhas_pesquisa" class="form-control"
+                     placeholder="ex: Machine Learning, Robótica"
+                     value="{{ request.form.get('linhas_pesquisa', '') }}">
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Disponibilidade</label>
+              <select name="disponibilidade" class="form-select">
+                {% for d in disponibilidades %}
+                <option value="{{ d }}" {% if request.form.get('disponibilidade', 'Média') == d %}selected{% endif %}>{{ d }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Especialidades</label>
+              <input type="text" name="especialidades" class="form-control"
+                     placeholder="ex: Python, Deep Learning"
+                     value="{{ request.form.get('especialidades', '') }}">
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-danger w-100 mt-2">Cadastrar</button>
         </form>
         <p class="text-center mt-3 mb-0 small">
           Já tem conta? <a href="{{ url_for('login.login') }}">Entrar</a>
@@ -36,4 +96,14 @@
     </div>
   </div>
 </div>
+
+<script>
+  function alternarCampos() {
+    const tipo = document.getElementById('tipo').value;
+    document.getElementById('campos-aluno').style.display = tipo === 'aluno' ? '' : 'none';
+    document.getElementById('campos-mentor').style.display = tipo === 'mentor' ? '' : 'none';
+  }
+  // garante estado correto ao carregar (ex: após erro de validação)
+  alternarCampos();
+</script>
 {% endblock %}
