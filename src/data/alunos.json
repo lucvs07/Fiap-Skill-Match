@@ -1,0 +1,13 @@
+[
+  {
+    "nome": "Lucas",
+    "curso": "Engenharia da Computação",
+    "areas_interesse": [
+      "Finanças"
+    ],
+    "habilidades_tecnicas": [
+      "Python",
+      "Java"
+    ]
+  }
+]
