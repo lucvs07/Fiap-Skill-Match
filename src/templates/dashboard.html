@@ -1,41 +1,116 @@
 {% extends 'base.html' %}
 {% block content %}
-<div class="row mb-3">
-  <div class="col-12">
-    <h1 class="mb-1">Olá, {{ nome }}!</h1>
-    <p class="text-muted">
-      Conta: <span class="badge bg-danger">{{ tipo | capitalize }}</span>
-    </p>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <h1 class="mb-0">Olá, {{ nome }}!</h1>
+    <span class="badge bg-danger mt-1">{{ tipo | capitalize }}</span>
   </div>
 </div>
 
-<div class="row">
-  <div class="col-md-4 mb-3">
+{# cards de estatísticas #}
+<div class="row g-3 mb-4">
+  <div class="col-6 col-md-3">
+    <div class="card border-0 shadow-sm text-center h-100">
+      <div class="card-body py-3">
+        <div class="fs-2 fw-bold text-danger">{{ stats.alunos }}</div>
+        <div class="text-muted small">Alunos</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="card border-0 shadow-sm text-center h-100">
+      <div class="card-body py-3">
+        <div class="fs-2 fw-bold text-danger">{{ stats.mentores }}</div>
+        <div class="text-muted small">Mentores</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="card border-0 shadow-sm text-center h-100">
+      <div class="card-body py-3">
+        <div class="fs-2 fw-bold text-danger">{{ stats.total }}</div>
+        <div class="text-muted small">Projetos</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="card border-0 shadow-sm text-center h-100">
+      <div class="card-body py-3">
+        <div class="fs-2 fw-bold text-danger">{{ stats.vagas_disponiveis }}</div>
+        <div class="text-muted small">Vagas abertas</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{# projetos recentes #}
+<div class="row mb-4">
+  <div class="col-12">
+    <div class="card border-0 shadow-sm">
+      <div class="card-header bg-white fw-semibold">Projetos recentes</div>
+      {% if projetos_recentes %}
+      <ul class="list-group list-group-flush">
+        {% for p in projetos_recentes %}
+        <li class="list-group-item d-flex justify-content-between align-items-start py-3">
+          <div>
+            <div class="fw-semibold">{{ p.titulo }}</div>
+            <small class="text-muted">{{ p.resumo_tema[:80] }}{% if p.resumo_tema|length > 80 %}…{% endif %}</small>
+            <div class="mt-1">
+              <small class="text-muted">por {{ p.criador_nome }} ({{ p.criador_tipo }})</small>
+            </div>
+          </div>
+          <div class="text-end ms-3 text-nowrap">
+            {% if p.status == 'Em Formação' %}
+              <span class="badge bg-success">{{ p.status }}</span>
+            {% else %}
+              <span class="badge bg-secondary">{{ p.status }}</span>
+            {% endif %}
+            <div class="mt-1">
+              <small class="text-muted">
+                {{ p.numero_vagas - p.participantes|length }} vaga{% if (p.numero_vagas - p.participantes|length) != 1 %}s{% endif %}
+              </small>
+            </div>
+          </div>
+        </li>
+        {% endfor %}
+      </ul>
+      {% else %}
+      <div class="card-body text-muted small">Nenhum projeto cadastrado ainda.</div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+{# atalhos de navegação #}
+<div class="row g-3">
+  <div class="col-md-4">
     <div class="card border-0 shadow-sm h-100">
       <div class="card-body text-center py-4">
         <h5 class="card-title">Mural de Projetos</h5>
-        <p class="card-text text-muted small">Explore e publique projetos de IC</p>
+        <p class="card-text text-muted small">Explore, publique e manifeste interesse em projetos de IC</p>
         <a href="#" class="btn btn-outline-danger btn-sm">Em breve</a>
       </div>
     </div>
   </div>
-  <div class="col-md-4 mb-3">
+  <div class="col-md-4">
     <div class="card border-0 shadow-sm h-100">
       <div class="card-body text-center py-4">
         <h5 class="card-title">Diretório de Mentores</h5>
-        <p class="card-text text-muted small">Encontre mentores para seu projeto</p>
+        <p class="card-text text-muted small">Encontre mentores por área de pesquisa ou disponibilidade</p>
         <a href="#" class="btn btn-outline-danger btn-sm">Em breve</a>
       </div>
     </div>
   </div>
-  <div class="col-md-4 mb-3">
+  <div class="col-md-4">
     <div class="card border-0 shadow-sm h-100">
       <div class="card-body text-center py-4">
-        <h5 class="card-title">Meu Perfil</h5>
-        <p class="card-text text-muted small">Gerencie suas informações</p>
+        <h5 class="card-title">Novo Projeto</h5>
+        <p class="card-text text-muted small">Publique uma oportunidade de IC para encontrar parceiros</p>
         <a href="#" class="btn btn-outline-danger btn-sm">Em breve</a>
       </div>
     </div>
   </div>
 </div>
+
 {% endblock %}
