@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h2 class="mb-0">Diretório de Mentores</h2>
+</div>
+
+{# filtros #}
+<form method="GET" class="row g-2 mb-4">
+  <div class="col-md-6">
+    <input type="text" name="busca" class="form-control form-control-sm"
+           placeholder="Buscar por nome, departamento ou especialidade..."
+           value="{{ busca }}">
+  </div>
+  <div class="col-md-4">
+    <select name="disponibilidade" class="form-select form-select-sm">
+      <option value="">Toda disponibilidade</option>
+      {% for d in disponibilidades %}
+      <option value="{{ d }}" {% if disponibilidade_filtro == d %}selected{% endif %}>{{ d }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="col-md-2">
+    <button type="submit" class="btn btn-outline-secondary btn-sm w-100">Filtrar</button>
+  </div>
+</form>
+
+{# cards de mentores #}
+{% if mentores %}
+<div class="row g-3">
+  {% for m in mentores %}
+  {% set idx = loop.index0 %}
+  <div class="col-md-6">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-start">
+          <h5 class="card-title mb-1">{{ m.nome }}</h5>
+          {% if m.disponibilidade == 'Alta' %}
+            <span class="badge bg-success">{{ m.disponibilidade }}</span>
+          {% elif m.disponibilidade == 'Média' %}
+            <span class="badge bg-warning text-dark">{{ m.disponibilidade }}</span>
+          {% else %}
+            <span class="badge bg-danger">{{ m.disponibilidade }}</span>
+          {% endif %}
+        </div>
+        <p class="text-muted small mb-2">{{ m.departamento }}</p>
+
+        <div class="mb-1">
+          <small class="text-muted fw-semibold">Especialidades: </small>
+          {% for e in m.especialidades %}
+            <span class="badge bg-light text-dark border me-1">{{ e }}</span>
+          {% endfor %}
+        </div>
+        <div class="mb-3">
+          <small class="text-muted fw-semibold">Linhas de pesquisa: </small>
+          {% for l in m.linhas_pesquisa %}
+            <span class="badge bg-light text-dark border me-1">{{ l }}</span>
+          {% endfor %}
+        </div>
+
+        <a href="{{ url_for('mentores.detalhe', idx=idx) }}"
+           class="btn btn-outline-danger btn-sm">Ver contato</a>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="text-center text-muted py-5">
+  <p class="mb-1">Nenhum mentor encontrado.</p>
+  {% if busca or disponibilidade_filtro %}
+  <a href="{{ url_for('mentores.diretorio') }}" class="btn btn-sm btn-outline-secondary mt-2">Limpar filtros</a>
+  {% endif %}
+</div>
+{% endif %}
+
+{% endblock %}
