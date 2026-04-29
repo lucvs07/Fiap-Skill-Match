@@ -89,7 +89,7 @@
       <div class="card-body text-center py-4">
         <h5 class="card-title">Mural de Projetos</h5>
         <p class="card-text text-muted small">Explore, publique e manifeste interesse em projetos de IC</p>
-        <a href="#" class="btn btn-outline-danger btn-sm">Em breve</a>
+        <a href="{{ url_for('projetos.mural') }}" class="btn btn-outline-danger btn-sm">Acessar</a>
       </div>
     </div>
   </div>
@@ -107,7 +107,7 @@
       <div class="card-body text-center py-4">
         <h5 class="card-title">Novo Projeto</h5>
         <p class="card-text text-muted small">Publique uma oportunidade de IC para encontrar parceiros</p>
-        <a href="#" class="btn btn-outline-danger btn-sm">Em breve</a>
+        <a href="{{ url_for('projetos.novo_projeto') }}" class="btn btn-outline-danger btn-sm">Publicar</a>
       </div>
     </div>
   </div>
