@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h2 class="mb-0">Buscar Talentos</h2>
+  <a href="{{ url_for('dashboard.dashboard') }}" class="btn btn-sm btn-outline-secondary">← Voltar</a>
+</div>
+
+{# filtros #}
+<form method="GET" class="row g-2 mb-4">
+  <div class="col-md-4">
+    <input type="text" name="skill" class="form-control form-control-sm"
+           placeholder="Skill (ex: Python)" value="{{ skill_filtro }}">
+  </div>
+  <div class="col-md-3">
+    <select name="nivel" class="form-select form-select-sm">
+      <option value="">Qualquer nível</option>
+      {% for n in NIVEIS_SKILL %}
+      <option value="{{ n }}" {% if nivel_filtro == n %}selected{% endif %}>{{ n }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="col-md-3">
+    <input type="text" name="curso" class="form-control form-control-sm"
+           placeholder="Curso" value="{{ curso_filtro }}">
+  </div>
+  <div class="col-md-2">
+    <button type="submit" class="btn btn-outline-secondary btn-sm w-100">Filtrar</button>
+  </div>
+</form>
+
+{% if alunos %}
+<div class="row g-3">
+  {% for aluno in alunos %}
+  {% set idx = loop.index0 %}
+  <div class="col-md-6">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-body">
+        <h5 class="card-title mb-1">{{ aluno.nome }}</h5>
+        <small class="text-muted">{{ aluno.get('curso', '—') }}</small>
+        {% if aluno.get('skills') %}
+        <div class="mt-2">
+          {% for s in aluno.skills[:5] %}
+            {% if s.nivel == 'Avançado' %}
+              <span class="badge bg-success me-1">{{ s.skill }}</span>
+            {% elif s.nivel == 'Intermediário' %}
+              <span class="badge bg-warning text-dark me-1">{{ s.skill }}</span>
+            {% else %}
+              <span class="badge bg-danger me-1">{{ s.skill }}</span>
+            {% endif %}
+          {% endfor %}
+          {% if aluno.skills|length > 5 %}
+            <span class="text-muted small">+{{ aluno.skills|length - 5 }}</span>
+          {% endif %}
+        </div>
+        {% endif %}
+        <div class="mt-3">
+          <a href="{{ url_for('alunos.perfil_publico', idx=idx) }}" class="btn btn-sm btn-outline-danger">Ver perfil</a>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="text-center text-muted py-5">
+  <p class="mb-1">Nenhum aluno encontrado com os filtros aplicados.</p>
+  {% if skill_filtro or nivel_filtro or curso_filtro %}
+  <a href="{{ url_for('alunos.busca_alunos') }}" class="btn btn-sm btn-outline-secondary mt-2">Limpar filtros</a>
+  {% endif %}
+</div>
+{% endif %}
+
+{% endblock %}

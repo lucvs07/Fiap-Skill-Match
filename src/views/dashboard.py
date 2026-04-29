@@ -25,11 +25,15 @@ def dashboard():
         'mentores': len(carregar_mentores()),
         **estatisticas_projetos(),
     }
-    projetos_recentes = carregar_projetos()[-3:][::-1]
+    todos_projetos = carregar_projetos()
+    projetos_recentes = todos_projetos[-3:][::-1]
+    nome = session.get('nome')
+    tem_projetos = any(p.get('criador_nome') == nome for p in todos_projetos)
     return render_template(
         'dashboard.html',
-        nome=session.get('nome'),
+        nome=nome,
         tipo=session.get('tipo'),
         stats=stats,
         projetos_recentes=projetos_recentes,
+        tem_projetos=tem_projetos,
     )
