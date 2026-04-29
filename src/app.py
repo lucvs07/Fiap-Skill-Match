@@ -3,6 +3,7 @@ from src.auth.cadastro import cadastro_bp
 from src.auth.login import login_bp
 from src.views.dashboard import dashboard_bp
 from src.views.projetos import projetos_bp
+from src.views.mentores import mentores_bp
 
 
 def create_app():
@@ -13,6 +14,7 @@ def create_app():
     app.register_blueprint(login_bp)
     app.register_blueprint(dashboard_bp)
     app.register_blueprint(projetos_bp)
+    app.register_blueprint(mentores_bp)
 
     @app.route('/')
     def index():
