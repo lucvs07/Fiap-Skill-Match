@@ -1,5 +1,8 @@
 from functools import wraps
 from flask import Blueprint, render_template, session, redirect, url_for, flash
+from src.models.aluno import carregar_alunos
+from src.models.mentor import carregar_mentores
+from src.models.projeto import carregar_projetos, estatisticas_projetos
 
 dashboard_bp = Blueprint('dashboard', __name__)
 
@@ -17,4 +20,16 @@ def login_required(f):
 @dashboard_bp.route('/dashboard')
 @login_required
 def dashboard():
-    return render_template('dashboard.html', nome=session.get('nome'), tipo=session.get('tipo'))
+    stats = {
+        'alunos': len(carregar_alunos()),
+        'mentores': len(carregar_mentores()),
+        **estatisticas_projetos(),
+    }
+    projetos_recentes = carregar_projetos()[-3:][::-1]
+    return render_template(
+        'dashboard.html',
+        nome=session.get('nome'),
+        tipo=session.get('tipo'),
+        stats=stats,
+        projetos_recentes=projetos_recentes,
+    )
