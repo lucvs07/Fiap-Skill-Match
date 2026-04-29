@@ -1,0 +1,142 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="row justify-content-center">
+  <div class="col-md-8">
+    <div class="d-flex align-items-center mb-4">
+      <a href="{{ url_for('perfil.perfil') }}" class="btn btn-sm btn-outline-secondary me-3">← Voltar</a>
+      <h2 class="mb-0">Editar Perfil</h2>
+    </div>
+
+    <form method="POST">
+
+      {# dados gerais #}
+      <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-white fw-semibold">Dados gerais</div>
+        <div class="card-body">
+          <div class="mb-3">
+            <label class="form-label">Curso</label>
+            <input type="text" name="curso" class="form-control"
+                   value="{{ aluno.get('curso', '') }}">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Áreas de interesse <small class="text-muted">(separadas por vírgula)</small></label>
+            <input type="text" name="areas_interesse" class="form-control"
+                   value="{{ aluno.get('areas_interesse', [])|join(', ') }}">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Habilidades técnicas <small class="text-muted">(separadas por vírgula)</small></label>
+            <input type="text" name="habilidades_tecnicas" class="form-control"
+                   value="{{ aluno.get('habilidades_tecnicas', [])|join(', ') }}">
+          </div>
+        </div>
+      </div>
+
+      {# skills com nível #}
+      <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-white fw-semibold">Skills</div>
+        <div class="card-body">
+          <div id="skills-container">
+            {% for s in aluno.get('skills', []) %}
+            <div class="row g-2 mb-2 skill-row">
+              <div class="col-7">
+                <input type="text" name="skill[]" class="form-control form-control-sm"
+                       placeholder="Nome da skill" value="{{ s.skill }}">
+              </div>
+              <div class="col-4">
+                <select name="nivel[]" class="form-select form-select-sm">
+                  {% for n in NIVEIS_SKILL %}
+                  <option value="{{ n }}" {% if s.nivel == n %}selected{% endif %}>{{ n }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="col-1">
+                <button type="button" class="btn btn-sm btn-outline-danger remove-skill">✕</button>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+          <button type="button" id="add-skill" class="btn btn-sm btn-outline-secondary mt-2">+ Adicionar skill</button>
+        </div>
+      </div>
+
+      {# links externos #}
+      <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-white fw-semibold">Links externos</div>
+        <div class="card-body">
+          <div class="mb-3">
+            <label class="form-label">GitHub</label>
+            <input type="url" name="github" class="form-control"
+                   placeholder="https://github.com/usuario"
+                   value="{{ aluno.get('links', {}).get('github', '') }}">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">LinkedIn</label>
+            <input type="url" name="linkedin" class="form-control"
+                   placeholder="https://linkedin.com/in/usuario"
+                   value="{{ aluno.get('links', {}).get('linkedin', '') }}">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Figma</label>
+            <input type="url" name="figma" class="form-control"
+                   placeholder="https://figma.com/@usuario"
+                   value="{{ aluno.get('links', {}).get('figma', '') }}">
+          </div>
+        </div>
+      </div>
+
+      {# status busca #}
+      <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-white fw-semibold">Disponibilidade</div>
+        <div class="card-body">
+          <div class="form-check form-switch">
+            <input class="form-check-input" type="checkbox" name="status_busca"
+                   value="aberto" id="statusBusca"
+                   {% if aluno.get('status_busca', 'fechado') == 'aberto' %}checked{% endif %}>
+            <label class="form-check-label" for="statusBusca">Aberto a convites de squads</label>
+          </div>
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn-danger">Salvar</button>
+      <a href="{{ url_for('perfil.perfil') }}" class="btn btn-outline-secondary ms-2">Cancelar</a>
+    </form>
+  </div>
+</div>
+
+<script>
+  const container = document.getElementById('skills-container');
+  const niveis = {{ NIVEIS_SKILL | tojson }};
+
+  function buildRow(skillVal, nivelVal) {
+    const row = document.createElement('div');
+    row.className = 'row g-2 mb-2 skill-row';
+    const opts = niveis.map(n =>
+      `<option value="${n}"${n === nivelVal ? ' selected' : ''}>${n}</option>`
+    ).join('');
+    row.innerHTML = `
+      <div class="col-7">
+        <input type="text" name="skill[]" class="form-control form-control-sm"
+               placeholder="Nome da skill" value="${skillVal}">
+      </div>
+      <div class="col-4">
+        <select name="nivel[]" class="form-select form-select-sm">${opts}</select>
+      </div>
+      <div class="col-1">
+        <button type="button" class="btn btn-sm btn-outline-danger remove-skill">✕</button>
+      </div>`;
+    return row;
+  }
+
+  document.getElementById('add-skill').addEventListener('click', () => {
+    container.appendChild(buildRow('', niveis[0]));
+  });
+
+  container.addEventListener('click', e => {
+    if (e.target.classList.contains('remove-skill')) {
+      e.target.closest('.skill-row').remove();
+    }
+  });
+</script>
+
+{% endblock %}
