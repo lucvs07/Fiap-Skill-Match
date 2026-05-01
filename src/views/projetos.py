@@ -11,21 +11,38 @@ projetos_bp = Blueprint('projetos', __name__)
 @projetos_bp.route('/projetos')
 @login_required
 def mural():
-    projetos = carregar_projetos()
+    todos = carregar_projetos()
     busca = request.args.get('busca', '').strip().lower()
     status_filtro = request.args.get('status', '')
+    papel_filtro = request.args.get('papel', '').strip()
 
+    projetos = todos
     if busca:
         projetos = [p for p in projetos if busca in p['titulo'].lower()
                     or busca in p['resumo_tema'].lower()]
     if status_filtro in (STATUS_EM_FORMACAO, STATUS_GRUPO_FECHADO):
         projetos = [p for p in projetos if p['status'] == status_filtro]
+    if papel_filtro:
+        projetos = [
+            p for p in projetos
+            if any(v['papel'].lower() == papel_filtro.lower()
+                   for v in p.get('vagas_por_papel', []))
+        ]
+
+    papeis = sorted({
+        v['papel']
+        for p in todos
+        for v in p.get('vagas_por_papel', [])
+        if v.get('papel')
+    })
 
     return render_template(
         'projetos.html',
         projetos=projetos,
         busca=busca,
         status_filtro=status_filtro,
+        papel_filtro=papel_filtro,
+        papeis=papeis,
         STATUS_EM_FORMACAO=STATUS_EM_FORMACAO,
         STATUS_GRUPO_FECHADO=STATUS_GRUPO_FECHADO,
     )
@@ -46,8 +63,22 @@ def novo_projeto():
         elif not vagas.isdigit() or int(vagas) < 1:
             flash('Número de vagas deve ser um inteiro positivo.', 'danger')
         else:
+            papeis_nomes = request.form.getlist('papel[]')
+            papeis_stacks = request.form.getlist('stack[]')
+            papeis_qtds = request.form.getlist('quantidade[]')
+            vagas_por_papel = []
+            for p, s, q in zip(papeis_nomes, papeis_stacks, papeis_qtds):
+                p = p.strip()
+                if p:
+                    try:
+                        qtd = int(q) if q.strip().isdigit() else 1
+                    except (ValueError, AttributeError):
+                        qtd = 1
+                    vagas_por_papel.append({'papel': p, 'stack': s.strip(), 'quantidade': qtd})
+
             tipo = session.get('tipo', 'aluno').capitalize()
-            projeto = Projeto(titulo, resumo, int(vagas), tipo, session.get('nome'))
+            projeto = Projeto(titulo, resumo, int(vagas), tipo, session.get('nome'),
+                              vagas_por_papel=vagas_por_papel)
             projetos = carregar_projetos()
             projetos.append(projeto.to_dict())
             salvar_projetos(projetos)

@@ -9,7 +9,7 @@ STATUS_GRUPO_FECHADO = 'Grupo Fechado'
 
 class Projeto:
     def __init__(self, titulo, resumo_tema, numero_vagas, criador_tipo,
-                 criador_nome, status=STATUS_EM_FORMACAO):
+                 criador_nome, status=STATUS_EM_FORMACAO, vagas_por_papel=None):
         self.titulo = titulo
         self.resumo_tema = resumo_tema
         self.numero_vagas = numero_vagas
@@ -19,6 +19,7 @@ class Projeto:
         self.participantes = []
         self.interessados = []
         self.data_criacao = None
+        self.vagas_por_papel = vagas_por_papel or []  # list[{'papel': str, 'stack': str, 'quantidade': int}]
 
     def vagas_disponiveis(self):
         return self.numero_vagas - len(self.participantes)
@@ -34,6 +35,7 @@ class Projeto:
             'status': self.status,
             'data_criacao': self.data_criacao,
             'interessados': self.interessados,
+            'vagas_por_papel': self.vagas_por_papel,
         }
 
 
