@@ -111,6 +111,17 @@
       </div>
     </div>
   </div>
+  {% if session.tipo == 'mentor' or tem_projetos %}
+  <div class="col-md-4">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-body text-center py-4">
+        <h5 class="card-title">Buscar Talentos</h5>
+        <p class="card-text text-muted small">Encontre alunos abertos a convites por skill e nível</p>
+        <a href="{{ url_for('alunos.busca_alunos') }}" class="btn btn-outline-danger btn-sm">Buscar</a>
+      </div>
+    </div>
+  </div>
+  {% endif %}
 </div>
 
 {% endblock %}
