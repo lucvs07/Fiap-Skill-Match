@@ -13,6 +13,9 @@
     <div class="container">
       <a class="navbar-brand fw-bold" href="{{ url_for('dashboard.dashboard') }}">Skill Match</a>
       <div class="navbar-nav ms-auto align-items-center">
+        {% if session.tipo == 'aluno' %}
+        <a class="nav-link text-white me-2" href="{{ url_for('perfil.perfil') }}">Meu Perfil</a>
+        {% endif %}
         <span class="navbar-text text-white me-3">{{ session.nome }}</span>
         <a class="btn btn-outline-light btn-sm" href="{{ url_for('login.logout') }}">Sair</a>
       </div>
