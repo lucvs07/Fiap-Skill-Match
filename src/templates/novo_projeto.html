@@ -35,6 +35,11 @@
             <button type="button" id="add-papel" class="btn btn-sm btn-outline-secondary mt-2">+ Adicionar papel</button>
           </div>
 
+          <div class="mb-4 form-check">
+            <input type="checkbox" class="form-check-input" name="precisa_mentor" id="precisa_mentor">
+            <label class="form-check-label" for="precisa_mentor">Meu projeto precisa de um mentor</label>
+          </div>
+
           <button type="submit" class="btn btn-danger">Publicar</button>
           <a href="{{ url_for('projetos.mural') }}" class="btn btn-outline-secondary ms-2">Cancelar</a>
         </form>

@@ -1,0 +1,230 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="d-flex align-items-center mb-4">
+  <a href="{{ url_for('projetos.mural') }}" class="btn btn-sm btn-outline-secondary me-3">← Voltar</a>
+  <h2 class="mb-0">Detalhes do Projeto</h2>
+</div>
+
+<div class="row g-4">
+
+  {# coluna principal #}
+  <div class="col-md-8">
+
+    {# cabeçalho #}
+    <div class="card border-0 shadow-sm mb-4">
+      <div class="card-body p-4">
+        <div class="d-flex justify-content-between align-items-start mb-3">
+          <h3 class="mb-0">{{ projeto.titulo }}</h3>
+          {% if projeto.status == STATUS_EM_FORMACAO %}
+            <span class="badge bg-success fs-6">{{ projeto.status }}</span>
+          {% else %}
+            <span class="badge bg-secondary fs-6">{{ projeto.status }}</span>
+          {% endif %}
+        </div>
+
+        <p class="text-muted">{{ projeto.resumo_tema }}</p>
+
+        {% if projeto.get('vagas_por_papel') %}
+        <div class="mt-3">
+          <h6 class="text-muted text-uppercase small mb-2">Vagas por Papel</h6>
+          <div class="d-flex flex-wrap gap-2">
+            {% for vp in projeto.vagas_por_papel %}
+              <span class="badge bg-light text-dark border px-3 py-2">
+                {{ vp.papel }}{% if vp.stack %} · {{ vp.stack }}{% endif %}
+                {% if vp.quantidade > 1 %} ({{ vp.quantidade }}){% endif %}
+              </span>
+            {% endfor %}
+          </div>
+        </div>
+        {% endif %}
+
+        <hr class="my-3">
+
+        <div class="row g-3 text-center">
+          {% set vagas = projeto.numero_vagas - projeto.participantes|length %}
+          <div class="col-4">
+            <div class="fw-bold fs-4">{{ projeto.numero_vagas }}</div>
+            <small class="text-muted">Vagas totais</small>
+          </div>
+          <div class="col-4">
+            <div class="fw-bold fs-4 text-success">{{ vagas }}</div>
+            <small class="text-muted">Disponíveis</small>
+          </div>
+          <div class="col-4">
+            <div class="fw-bold fs-4">{{ projeto.participantes|length }}</div>
+            <small class="text-muted">Participantes</small>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    {# participantes atuais #}
+    {% if projeto.participantes %}
+    <div class="card border-0 shadow-sm mb-4">
+      <div class="card-header bg-white fw-semibold d-flex justify-content-between align-items-center">
+        <span>Participantes</span>
+        <span class="badge bg-success">{{ projeto.participantes|length }}</span>
+      </div>
+      <ul class="list-group list-group-flush">
+        {% for p in projeto.participantes %}
+          <li class="list-group-item px-4">{{ p }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+    {% endif %}
+
+    {# interessados — apenas para o criador do projeto #}
+    {% if eh_criador %}
+    <div class="card border-0 shadow-sm mb-4">
+      <div class="card-header bg-white fw-semibold d-flex justify-content-between align-items-center">
+        <span>Interessados</span>
+        <span class="badge bg-warning text-dark">{{ projeto.interessados|length }}</span>
+      </div>
+      <div class="card-body p-0">
+        {% if projeto.interessados %}
+          <ul class="list-group list-group-flush">
+            {% for nome in projeto.interessados %}
+              <li class="list-group-item px-4 py-3 d-flex justify-content-between align-items-center">
+                <span>{{ nome }}</span>
+                {% if projeto.status == STATUS_EM_FORMACAO %}
+                <div class="d-flex gap-2">
+                  <form method="POST" action="{{ url_for('projetos.aprovar_interessado', idx=idx, nome=nome) }}">
+                    <button type="submit" class="btn btn-sm btn-success">Aprovar</button>
+                  </form>
+                  <form method="POST" action="{{ url_for('projetos.rejeitar_interessado', idx=idx, nome=nome) }}">
+                    <button type="submit" class="btn btn-sm btn-outline-danger">Recusar</button>
+                  </form>
+                </div>
+                {% endif %}
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <div class="p-4 text-center text-muted small">
+            Nenhum aluno manifestou interesse ainda.
+          </div>
+        {% endif %}
+      </div>
+    </div>
+    {% endif %}
+
+    {# seção de mentor #}
+    {% if projeto.get('mentor_responsavel') %}
+    <div class="card border-0 shadow-sm mb-4">
+      <div class="card-header bg-white fw-semibold">Mentor Responsável</div>
+      <div class="card-body">
+        <span class="badge bg-primary fs-6">{{ projeto.mentor_responsavel }}</span>
+      </div>
+    </div>
+    {% elif projeto.get('precisa_mentor') %}
+      {% if session.tipo == 'mentor' and not eh_criador %}
+        {% if session.nome in projeto.get('mentores_interessados', []) %}
+        <div class="alert alert-info">Candidatura enviada. Aguarde a resposta do criador do projeto.</div>
+        {% else %}
+        <div class="card border-0 shadow-sm mb-4">
+          <div class="card-body">
+            <form method="POST" action="{{ url_for('projetos.candidatar_mentor', idx=idx) }}">
+              <button type="submit" class="btn btn-danger w-100">Quero mentorar este projeto</button>
+            </form>
+          </div>
+        </div>
+        {% endif %}
+      {% endif %}
+      {% if eh_criador %}
+      <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-white fw-semibold d-flex justify-content-between align-items-center">
+          <span>Candidaturas de Mentores</span>
+          <span class="badge bg-warning text-dark">{{ projeto.get('mentores_interessados', [])|length }}</span>
+        </div>
+        <div class="card-body p-0">
+          {% if projeto.get('mentores_interessados') %}
+            <ul class="list-group list-group-flush">
+              {% for nome in projeto.mentores_interessados %}
+                <li class="list-group-item px-4 py-3 d-flex justify-content-between align-items-center">
+                  <span>{{ nome }}</span>
+                  <div class="d-flex gap-2">
+                    <form method="POST" action="{{ url_for('projetos.aprovar_mentor', idx=idx, nome=nome) }}">
+                      <button type="submit" class="btn btn-sm btn-success">Aprovar</button>
+                    </form>
+                    <form method="POST" action="{{ url_for('projetos.rejeitar_mentor', idx=idx, nome=nome) }}">
+                      <button type="submit" class="btn btn-sm btn-outline-danger">Recusar</button>
+                    </form>
+                  </div>
+                </li>
+              {% endfor %}
+            </ul>
+          {% else %}
+            <div class="p-4 text-center text-muted small">
+              Nenhum mentor se candidatou ainda.
+            </div>
+          {% endif %}
+        </div>
+      </div>
+      {% endif %}
+    {% endif %}
+
+  </div>
+
+  {# sidebar #}
+  <div class="col-md-4">
+
+    {# criador #}
+    <div class="card border-0 shadow-sm mb-4">
+      <div class="card-header bg-white fw-semibold">Criador</div>
+      <div class="card-body">
+        <p class="fw-semibold mb-0">{{ projeto.criador_nome }}</p>
+        <small class="text-muted">{{ projeto.criador_tipo }}</small>
+      </div>
+    </div>
+
+    {# resumo de interesse #}
+    <div class="card border-0 shadow-sm mb-4">
+      <div class="card-header bg-white fw-semibold">Engajamento</div>
+      <div class="card-body">
+        <div class="d-flex justify-content-between mb-2">
+          <span class="text-muted small">Interessados</span>
+          <strong>{{ projeto.interessados|length }}</strong>
+        </div>
+        <div class="d-flex justify-content-between mb-2">
+          <span class="text-muted small">Participantes confirmados</span>
+          <strong>{{ projeto.participantes|length }}</strong>
+        </div>
+        {% if projeto.get('precisa_mentor') is not none %}
+        <div class="d-flex justify-content-between">
+          <span class="text-muted small">Precisa de mentor</span>
+          {% if projeto.get('precisa_mentor') %}
+            <span class="badge bg-warning text-dark">Sim</span>
+          {% else %}
+            <span class="badge bg-secondary">Não</span>
+          {% endif %}
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+    {# ação do aluno #}
+    {% if session.tipo == 'aluno' and projeto.status == STATUS_EM_FORMACAO %}
+      {% set ja_interessado = session.nome in projeto.interessados %}
+      {% set ja_participa = session.nome in projeto.participantes %}
+      <div class="card border-0 shadow-sm">
+        <div class="card-body">
+          {% if ja_participa %}
+            <div class="alert alert-success mb-0 text-center small">Você é participante deste projeto.</div>
+          {% elif ja_interessado %}
+            <div class="alert alert-info mb-0 text-center small">Interesse registrado. Aguarde a aprovação.</div>
+          {% else %}
+            <form method="POST" action="{{ url_for('projetos.manifestar_interesse', idx=idx) }}">
+              <button type="submit" class="btn btn-danger w-100">Tenho interesse</button>
+            </form>
+          {% endif %}
+        </div>
+      </div>
+    {% elif projeto.status == STATUS_GRUPO_FECHADO and not eh_criador %}
+      <div class="alert alert-secondary text-center small">Este projeto está com o grupo fechado.</div>
+    {% endif %}
+
+  </div>
+</div>
+
+{% endblock %}

@@ -37,10 +37,9 @@
 </form>
 
 {# lista de projetos #}
-{% if projetos %}
+{% if projetos_com_idx %}
 <div class="row g-3">
-  {% for p in projetos %}
-  {% set idx = loop.index0 %}
+  {% for idx, p in projetos_com_idx %}
   {% set vagas = p.numero_vagas - p.participantes|length %}
   <div class="col-md-6">
     <div class="card border-0 shadow-sm h-100">
@@ -67,23 +66,13 @@
           <small class="text-muted">
             por <strong>{{ p.criador_nome }}</strong> ({{ p.criador_tipo }})
             &nbsp;·&nbsp;
-            <strong>{{ vagas }}</strong> vaga{% if vagas != 1 %}s{% endif %} disponível{% if vagas != 1 %}eis{% endif %}
+            <strong>{{ vagas }}</strong> vaga{% if vagas != 1 %}s disponíveis{% else %} disponível{% endif %}
             &nbsp;·&nbsp;
             <strong>{{ p.interessados|length }}</strong> interessado{% if p.interessados|length != 1 %}s{% endif %}
           </small>
-          {% if session.tipo == 'aluno' and p.status == STATUS_EM_FORMACAO %}
-            {% set ja_interessado = session.nome in p.interessados %}
-            {% set ja_participa = session.nome in p.participantes %}
-            <form method="POST" action="{{ url_for('projetos.manifestar_interesse', idx=idx) }}" class="ms-2">
-              <button type="submit" class="btn btn-sm {% if ja_interessado or ja_participa %}btn-outline-secondary disabled{% else %}btn-outline-danger{% endif %}"
-                      {% if ja_interessado or ja_participa %}disabled{% endif %}>
-                {% if ja_participa %}Participante
-                {% elif ja_interessado %}Interesse registrado
-                {% else %}Tenho interesse
-                {% endif %}
-              </button>
-            </form>
-          {% endif %}
+          <a href="{{ url_for('projetos.detalhe', idx=idx) }}" class="btn btn-sm btn-outline-secondary ms-2">
+            Ver detalhes
+          </a>
         </div>
       </div>
     </div>
