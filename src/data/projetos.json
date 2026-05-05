@@ -9,7 +9,8 @@
     "status": "Em Formação",
     "data_criacao": null,
     "interessados": [
-      "Lucas"
+      "Lucas",
+      "Neymar Jr"
     ]
   },
   {
@@ -49,7 +50,9 @@
     "numero_vagas": 3,
     "criador_tipo": "Mentor",
     "criador_nome": "Endrick",
-    "participantes": [],
+    "participantes": [
+      "Neymar Jr"
+    ],
     "status": "Em Formação",
     "data_criacao": null,
     "interessados": [],
@@ -65,5 +68,18 @@
         "quantidade": 1
       }
     ]
+  },
+  {
+    "titulo": "Teste",
+    "resumo_tema": "teste criação de um projeto",
+    "numero_vagas": 3,
+    "criador_tipo": "Aluno",
+    "criador_nome": "Neymar Jr",
+    "participantes": [],
+    "status": "Em Formação",
+    "data_criacao": null,
+    "interessados": [],
+    "vagas_por_papel": [],
+    "precisa_mentor": true
   }
 ]
