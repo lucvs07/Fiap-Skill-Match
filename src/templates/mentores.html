@@ -26,10 +26,9 @@
 </form>
 
 {# cards de mentores #}
-{% if mentores %}
+{% if mentores_com_idx %}
 <div class="row g-3">
-  {% for m in mentores %}
-  {% set idx = loop.index0 %}
+  {% for idx, m in mentores_com_idx %}
   <div class="col-md-6">
     <div class="card border-0 shadow-sm h-100">
       <div class="card-body">

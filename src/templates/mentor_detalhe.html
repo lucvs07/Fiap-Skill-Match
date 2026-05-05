@@ -1,19 +1,22 @@
 {% extends 'base.html' %}
 {% block content %}
 
-<div class="row justify-content-center">
-  <div class="col-md-7">
-    <div class="d-flex align-items-center mb-4">
-      <a href="{{ url_for('mentores.diretorio') }}" class="btn btn-sm btn-outline-secondary me-3">← Voltar</a>
-      <h2 class="mb-0">Perfil do Mentor</h2>
-    </div>
+<div class="d-flex align-items-center mb-4">
+  <a href="{{ url_for('mentores.diretorio') }}" class="btn btn-sm btn-outline-secondary me-3">← Voltar</a>
+  <h2 class="mb-0">Perfil do Mentor</h2>
+</div>
 
-    <div class="card border-0 shadow-sm">
+<div class="row g-4">
+
+  {# coluna principal #}
+  <div class="col-md-8">
+
+    {# cabeçalho #}
+    <div class="card border-0 shadow-sm mb-4">
       <div class="card-body p-4">
-
-        <div class="d-flex justify-content-between align-items-start mb-3">
+        <div class="d-flex justify-content-between align-items-start">
           <div>
-            <h3 class="mb-0">{{ mentor.nome }}</h3>
+            <h3 class="mb-1">{{ mentor.nome }}</h3>
             <p class="text-muted mb-0">{{ mentor.departamento }}</p>
           </div>
           {% if mentor.disponibilidade == 'Alta' %}
@@ -33,40 +36,160 @@
             <div>
               {% for e in mentor.especialidades %}
                 <span class="badge bg-light text-dark border me-1 mb-1">{{ e }}</span>
+              {% else %}
+                <span class="text-muted small">Não informado.</span>
               {% endfor %}
             </div>
           </div>
           <div class="col-md-6">
-            <h6 class="text-muted text-uppercase small mb-2">Linhas de pesquisa</h6>
+            <h6 class="text-muted text-uppercase small mb-2">Linhas de Pesquisa</h6>
             <div>
               {% for l in mentor.linhas_pesquisa %}
                 <span class="badge bg-light text-dark border me-1 mb-1">{{ l }}</span>
+              {% else %}
+                <span class="text-muted small">Não informado.</span>
               {% endfor %}
             </div>
           </div>
         </div>
-
-        <hr>
-
-        <div class="row g-3">
-          <div class="col-md-6">
-            <h6 class="text-muted text-uppercase small mb-2">Contato</h6>
-            <p class="mb-0">
-              <a href="mailto:{{ mentor.email }}" class="text-danger">{{ mentor.email }}</a>
-            </p>
-          </div>
-          <div class="col-md-6">
-            <h6 class="text-muted text-uppercase small mb-2">Alunos orientando</h6>
-            {% if mentor.alunos_orientando %}
-              <p class="mb-0">{{ mentor.alunos_orientando | join(', ') }}</p>
-            {% else %}
-              <p class="text-muted small mb-0">Nenhum aluno no momento.</p>
-            {% endif %}
-          </div>
-        </div>
-
       </div>
     </div>
+
+    {# projetos #}
+    <div class="card border-0 shadow-sm">
+      <div class="card-header bg-white fw-semibold d-flex justify-content-between align-items-center">
+        <span>Projetos</span>
+        <span class="badge bg-secondary">{{ projetos | length }}</span>
+      </div>
+      <div class="card-body p-0">
+        {% if projetos %}
+          <ul class="list-group list-group-flush">
+            {% for p in projetos %}
+              {% set vagas = p.numero_vagas - p.participantes | length %}
+              <li class="list-group-item px-4 py-3">
+                <div class="d-flex justify-content-between align-items-start">
+                  <div>
+                    <p class="fw-semibold mb-1">{{ p.titulo }}</p>
+                    <p class="text-muted small mb-2">{{ p.resumo_tema }}</p>
+                    {% if p.get('vagas_por_papel') %}
+                      <div class="d-flex flex-wrap gap-1 mb-1">
+                        {% for vp in p.vagas_por_papel %}
+                          <span class="badge bg-light text-dark border">
+                            {{ vp.papel }} · {{ vp.stack }}
+                            {% if vp.quantidade > 1 %}({{ vp.quantidade }}){% endif %}
+                          </span>
+                        {% endfor %}
+                      </div>
+                    {% endif %}
+                    <small class="text-muted">
+                      <strong>{{ vagas }}</strong>
+                      vaga{% if vagas != 1 %}s disponíveis{% else %} disponível{% endif %}
+                      &nbsp;·&nbsp;
+                      <strong>{{ p.interessados | length }}</strong>
+                      interessado{% if p.interessados | length != 1 %}s{% endif %}
+                    </small>
+                  </div>
+                  <div class="text-end ms-3 flex-shrink-0">
+                    {% if p.status == 'Em Formação' %}
+                      <span class="badge bg-success">{{ p.status }}</span>
+                    {% else %}
+                      <span class="badge bg-secondary">{{ p.status }}</span>
+                    {% endif %}
+                    <div class="mt-1">
+                      <small class="text-muted text-uppercase" style="font-size:.7rem;">
+                        {% if p.criador_tipo == 'Mentor' %}Criado por mim{% else %}Membro{% endif %}
+                      </small>
+                    </div>
+                  </div>
+                </div>
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <div class="p-4 text-center text-muted small">
+            Nenhum projeto encontrado para este mentor.
+          </div>
+        {% endif %}
+      </div>
+    </div>
+
+  </div>
+
+  {# sidebar #}
+  <div class="col-md-4">
+
+    {# contato #}
+    <div class="card border-0 shadow-sm mb-4">
+      <div class="card-header bg-white fw-semibold">Contato</div>
+      <div class="card-body">
+        <a href="mailto:{{ mentor.email }}" class="text-danger">{{ mentor.email }}</a>
+      </div>
+    </div>
+
+    {# alunos orientando #}
+    <div class="card border-0 shadow-sm mb-4">
+      <div class="card-header bg-white fw-semibold d-flex justify-content-between align-items-center">
+        <span>Alunos Orientando</span>
+        <span class="badge bg-secondary">{{ mentor.alunos_orientando | length }}</span>
+      </div>
+      <div class="card-body">
+        {% if mentor.alunos_orientando %}
+          <ul class="list-unstyled mb-0">
+            {% for aluno in mentor.alunos_orientando %}
+              <li class="mb-1">{{ aluno }}</li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <p class="text-muted small mb-0">Nenhum aluno no momento.</p>
+        {% endif %}
+      </div>
+    </div>
+
+    {# solicitar mentoria — apenas para alunos #}
+    {% if session.tipo == 'aluno' %}
+    <div class="card border-0 shadow-sm mb-4">
+      <div class="card-header bg-white fw-semibold">Solicitar Mentoria</div>
+      <div class="card-body">
+        {% if projetos_para_solicitar %}
+        <form method="POST" action="{{ url_for('mentores.solicitar_mentoria', idx=idx) }}">
+          <div class="mb-3">
+            <select name="projeto_titulo" class="form-select form-select-sm" required>
+              <option value="">Selecione um projeto...</option>
+              {% for p in projetos_para_solicitar %}
+                <option value="{{ p.titulo }}">{{ p.titulo }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <button type="submit" class="btn btn-danger w-100">Enviar Solicitação</button>
+        </form>
+        {% else %}
+          <p class="text-muted small mb-0">Você não tem projetos que precisam de mentor.</p>
+        {% endif %}
+      </div>
+    </div>
+    {% endif %}
+
+    {# resumo estatístico #}
+    <div class="card border-0 shadow-sm">
+      <div class="card-header bg-white fw-semibold">Resumo</div>
+      <div class="card-body">
+        {% set criados = projetos | selectattr('criador_tipo', 'equalto', 'Mentor') | list %}
+        {% set em_formacao = projetos | selectattr('status', 'equalto', 'Em Formação') | list %}
+        <div class="d-flex justify-content-between mb-2">
+          <span class="text-muted small">Projetos criados</span>
+          <strong>{{ criados | length }}</strong>
+        </div>
+        <div class="d-flex justify-content-between mb-2">
+          <span class="text-muted small">Em formação</span>
+          <strong>{{ em_formacao | length }}</strong>
+        </div>
+        <div class="d-flex justify-content-between">
+          <span class="text-muted small">Grupo fechado</span>
+          <strong>{{ projetos | length - em_formacao | length }}</strong>
+        </div>
+      </div>
+    </div>
+
   </div>
 </div>
 
