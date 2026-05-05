@@ -123,34 +123,49 @@ Fiap-Skill-Match/
 - Logout com limpeza de sessão
 - Redirecionamento automático conforme tipo de usuário (aluno/mentor)
 
-### Casos de Uso
+### Requisitos Funcionais (RF)
 
-| Caso de Uso | Status |
-|---|---|
-| Cadastro e login de aluno | ✅ Implementado |
-| Cadastro e login de mentor | ✅ Implementado |
-| Edição de perfil do aluno (skills, links, áreas de interesse, status de busca) | ✅ Implementado |
-| Perfil interno do mentor com projetos e estatísticas | ✅ Implementado |
-| Publicar projeto com vagas por papel e stack tecnológica | ✅ Implementado |
-| Marcar projeto como "precisa de mentor" na criação | ✅ Implementado |
-| Mural de projetos com filtros por status, papel e busca textual | ✅ Implementado |
-| Página de detalhe do projeto com métricas de vagas e participantes | ✅ Implementado |
-| Aluno manifesta interesse em projeto | ✅ Implementado |
-| Criador aprova ou recusa interessados individualmente | ✅ Implementado |
-| Fechamento automático do grupo ao atingir limite de vagas | ✅ Implementado |
-| Mentor se candidata a projetos de alunos que precisam de orientação | ✅ Implementado |
-| Aluno aprova ou recusa candidatura de mentor ao projeto | ✅ Implementado |
-| Envio de convite de squad por mentor ou criador de projeto para aluno | ✅ Implementado |
-| Aluno solicita mentoria diretamente no perfil de um mentor | ✅ Implementado |
-| Inbox de convites do aluno com aceitar/recusar e efeito no projeto | ✅ Implementado |
-| Inbox de solicitações de mentoria do mentor com aceitar/recusar | ✅ Implementado |
-| Badge de notificação de convites pendentes na navbar (aluno e mentor) | ✅ Implementado |
-| Busca de alunos por skill, nível e curso (aberta a todos os usuários) | ✅ Implementado |
-| Perfil público do aluno com skills e opção de convite para squad | ✅ Implementado |
-| Diretório de mentores com filtros por disponibilidade e especialidade | ✅ Implementado |
-| Perfil público do mentor com projetos, contato e solicitação de mentoria | ✅ Implementado |
-| Aba "Meus Projetos" do aluno (criados, participando, aguardando aprovação) | ✅ Implementado |
-| Dashboard com estatísticas gerais e projetos recentes | ✅ Implementado |
+| # | Caso de Uso | Status |
+|---|---|---|
+| RF01 | Cadastro de aluno com nome, curso e áreas de interesse | ✅ Implementado |
+| RF01 | Edição de perfil do aluno (skills por nível, links externos, status de busca) | ✅ Implementado |
+| RF02 | Cadastro de mentor com linhas de pesquisa e disponibilidade | ✅ Implementado |
+| RF02 | Perfil interno do mentor com projetos e estatísticas | ✅ Implementado |
+| RF03 | Publicar projeto com título, resumo do tema e número de vagas | ✅ Implementado |
+| RF03 | Marcar projeto como "precisa de mentor" na criação | ✅ Implementado |
+| RF04 | Mural de projetos com lista centralizada e filtros por status e busca textual | ✅ Implementado |
+| RF04 | Página de detalhe do projeto com métricas de vagas e participantes | ✅ Implementado |
+| RF05 | Diretório de mentores com filtros por disponibilidade e especialidade | ✅ Implementado |
+| RF05 | Perfil público do mentor com projetos, contato e solicitação de mentoria | ✅ Implementado |
+| RF06 | Botão "Tenho interesse" em projetos abertos | ✅ Implementado |
+| RF07 | Criador visualiza lista de interessados e aprova ou recusa individualmente | ✅ Implementado |
+| RF07 | Aluno visualiza status de interesse e aguarda aprovação | ✅ Implementado |
+| RF08 | Fechamento automático do grupo ao atingir o limite de vagas | ✅ Implementado |
+| RF08 | Alteração manual do status do projeto pelo criador (Em Formação / Grupo Fechado) | ✅ Implementado |
+| RF09 | Skills com nível de proficiência (Básico, Intermediário, Avançado) no perfil do aluno | ✅ Implementado |
+| RF09 | Links externos no perfil do aluno (GitHub, LinkedIn, Figma) | ✅ Implementado |
+| RF10 | Vagas por papel e stack ao criar projeto (ex: 1 UI/UX, 1 Mobile Flutter) | ✅ Implementado |
+| RF10 | Filtro de projetos por papel/stack no mural | ✅ Implementado |
+| RF11 | Busca de alunos por skill, nível e curso (aberta a todos os usuários logados) | ✅ Implementado |
+| RF11 | Envio de convite para squad pelo perfil público do aluno | ✅ Implementado |
+| RF11 | Inbox de convites do aluno com aceitar/recusar e efeito no projeto | ✅ Implementado |
+| —  | Mentor se candidata a projetos de alunos que precisam de orientação | ✅ Implementado |
+| —  | Aluno aprova ou recusa candidatura de mentor ao projeto | ✅ Implementado |
+| —  | Aluno solicita mentoria pelo perfil público de um mentor específico | ✅ Implementado |
+| —  | Inbox de solicitações de mentoria do mentor com aceitar/recusar | ✅ Implementado |
+| —  | Badge de notificação de convites pendentes na navbar (aluno e mentor) | ✅ Implementado |
+| —  | Aba "Meus Projetos" do aluno (criados, participando, aguardando aprovação) | ✅ Implementado |
+| —  | Dashboard com estatísticas gerais e projetos recentes | ✅ Implementado |
+
+### Requisitos Não Funcionais (RNF)
+
+| # | Requisito | Status |
+|---|---|---|
+| RNF01 | Usabilidade: navegação web intuitiva com navbar, breadcrumbs e menus contextuais | ✅ Implementado |
+| RNF02 | Portabilidade: Flask roda em Windows, Linux e macOS com Python instalado | ✅ Implementado |
+| RNF03 | Persistência local: dados salvos em arquivos JSON sem perda ao reiniciar | ✅ Implementado |
+| RNF04 | Validação de entradas: campos obrigatórios, vagas > 0, duplicatas bloqueadas | 🚧 Parcial |
+| RNF05 | Responsividade mobile-first: layout Bootstrap 5 adaptável a qualquer resolução | ✅ Implementado |
 
 ## ⭐ Diferencial do Projeto
 

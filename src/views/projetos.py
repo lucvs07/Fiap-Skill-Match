@@ -105,6 +105,27 @@ def detalhe(idx):
                            STATUS_GRUPO_FECHADO=STATUS_GRUPO_FECHADO)
 
 
+@projetos_bp.route('/projetos/<int:idx>/status', methods=['POST'])
+@login_required
+def alterar_status(idx):
+    projetos = carregar_projetos()
+    if idx < 0 or idx >= len(projetos):
+        flash('Projeto não encontrado.', 'danger')
+        return redirect(url_for('projetos.mural'))
+    projeto = projetos[idx]
+    eh_criador = (session.get('nome') == projeto.get('criador_nome')
+                  and session.get('tipo') == projeto.get('criador_tipo', '').lower())
+    if not eh_criador:
+        flash('Sem permissão.', 'danger')
+        return redirect(url_for('projetos.detalhe', idx=idx))
+    novo_status = request.form.get('status')
+    if novo_status in (STATUS_EM_FORMACAO, STATUS_GRUPO_FECHADO):
+        projeto['status'] = novo_status
+        salvar_projetos(projetos)
+        flash(f'Status atualizado para "{novo_status}".', 'success')
+    return redirect(url_for('projetos.detalhe', idx=idx))
+
+
 @projetos_bp.route('/projetos/<int:idx>/aprovar/<nome>', methods=['POST'])
 @login_required
 def aprovar_interessado(idx, nome):

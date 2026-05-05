@@ -203,8 +203,30 @@
       </div>
     </div>
 
+    {# controle de status — apenas para o criador #}
+    {% if eh_criador %}
+    <div class="card border-0 shadow-sm mb-4">
+      <div class="card-header bg-white fw-semibold">Gerenciar Status</div>
+      <div class="card-body">
+        {% if projeto.status == STATUS_EM_FORMACAO %}
+          <p class="text-muted small mb-3">O projeto está <strong>aberto</strong> para novos membros.</p>
+          <form method="POST" action="{{ url_for('projetos.alterar_status', idx=idx) }}">
+            <input type="hidden" name="status" value="{{ STATUS_GRUPO_FECHADO }}">
+            <button type="submit" class="btn btn-outline-secondary w-100 btn-sm">Fechar grupo</button>
+          </form>
+        {% else %}
+          <p class="text-muted small mb-3">O grupo está <strong>fechado</strong>. Reabrir permite novas inscrições.</p>
+          <form method="POST" action="{{ url_for('projetos.alterar_status', idx=idx) }}">
+            <input type="hidden" name="status" value="{{ STATUS_EM_FORMACAO }}">
+            <button type="submit" class="btn btn-outline-danger w-100 btn-sm">Reabrir vagas</button>
+          </form>
+        {% endif %}
+      </div>
+    </div>
+    {% endif %}
+
     {# ação do aluno #}
-    {% if session.tipo == 'aluno' and projeto.status == STATUS_EM_FORMACAO %}
+    {% if not eh_criador and session.tipo == 'aluno' and projeto.status == STATUS_EM_FORMACAO %}
       {% set ja_interessado = session.nome in projeto.interessados %}
       {% set ja_participa = session.nome in projeto.participantes %}
       <div class="card border-0 shadow-sm">
@@ -220,7 +242,7 @@
           {% endif %}
         </div>
       </div>
-    {% elif projeto.status == STATUS_GRUPO_FECHADO and not eh_criador %}
+    {% elif not eh_criador and projeto.status == STATUS_GRUPO_FECHADO %}
       <div class="alert alert-secondary text-center small">Este projeto está com o grupo fechado.</div>
     {% endif %}
 
