@@ -193,7 +193,7 @@ A formação de squads por afinidade pessoal tende a reproduzir vieses de rede �
 ## 🎬 Demonstração
 
 - [Vídeo de apresentação — Checkpoint 1](https://www.youtube.com/watch?v=Sdnw7jtl4P0)
-- 📸 Prints e GIFs do Checkpoint 2 a serem adicionados
+- [Vídeo de apresentação — Checkpoint 2](https://youtu.be/EfwtMyMiHK0)
 
 ## 👥 Integrantes do Grupo
 
@@ -211,3 +211,4 @@ A formação de squads por afinidade pessoal tende a reproduzir vieses de rede �
 - [Repositório GitHub](https://github.com/lucvs07/Fiap-Skill-Match)
 - [Miro — Mapeamento do Projeto](https://miro.com/welcomeonboard/OWc5ZHh0ZVpQVEg2S2laUHFEYzZmN0kxMVh5QldsUlJmTVIxWkVVd21pSUdDRGtKNGF6UDgxM3A4VjZMUWtaWVNvQjAwS01rcFBPT3g1OC9OajBkVlFiVmtvckVBWURpSjJ1YVVZVHZvOVBBdkovclZUU2svak42L1FueDR3KzRzVXVvMm53MW9OWFg1bkJoVXZxdFhRPT0hdjE=?share_link_id=595511452638)
 - [Vídeo de Apresentação — CP1](https://www.youtube.com/watch?v=Sdnw7jtl4P0)
+- [Vídeo de apresentação — Checkpoint 2](https://youtu.be/EfwtMyMiHK0)
