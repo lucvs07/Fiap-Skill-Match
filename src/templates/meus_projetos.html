@@ -1,0 +1,155 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="d-flex align-items-center mb-4">
+  <a href="{{ url_for('perfil.perfil') }}" class="btn btn-sm btn-outline-secondary me-3">← Voltar</a>
+  <h2 class="mb-0">Meus Projetos</h2>
+</div>
+
+<ul class="nav nav-tabs mb-4" id="projetosTabs">
+  <li class="nav-item">
+    <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#criados">
+      Criados por mim
+      <span class="badge bg-secondary ms-1">{{ criados | length }}</span>
+    </button>
+  </li>
+  <li class="nav-item">
+    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#participando">
+      Participando
+      <span class="badge bg-secondary ms-1">{{ participando | length }}</span>
+    </button>
+  </li>
+  <li class="nav-item">
+    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#interessado">
+      Aguardando aprovação
+      <span class="badge bg-secondary ms-1">{{ interessado | length }}</span>
+    </button>
+  </li>
+</ul>
+
+<div class="tab-content">
+
+  {# aba: criados #}
+  <div class="tab-pane fade show active" id="criados">
+    {% if criados %}
+    <div class="row g-3">
+      {% for idx, p in criados %}
+      {% set vagas = p.numero_vagas - p.participantes | length %}
+      <div class="col-md-6">
+        <div class="card border-0 shadow-sm h-100">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start mb-1">
+              <h6 class="fw-semibold mb-0">{{ p.titulo }}</h6>
+              {% if p.status == 'Em Formação' %}
+                <span class="badge bg-success ms-2 text-nowrap">{{ p.status }}</span>
+              {% else %}
+                <span class="badge bg-secondary ms-2 text-nowrap">{{ p.status }}</span>
+              {% endif %}
+            </div>
+            <p class="text-muted small mb-2">{{ p.resumo_tema }}</p>
+            <div class="d-flex flex-wrap gap-1 mb-2">
+              {% for vp in p.get('vagas_por_papel', []) %}
+                <span class="badge bg-light text-dark border">{{ vp.papel }}{% if vp.stack %} · {{ vp.stack }}{% endif %}</span>
+              {% endfor %}
+            </div>
+            <small class="text-muted d-block mb-3">
+              <strong>{{ vagas }}</strong> vaga{% if vagas != 1 %}s disponíveis{% else %} disponível{% endif %}
+              &nbsp;·&nbsp;
+              <strong>{{ p.participantes | length }}</strong> participante{% if p.participantes | length != 1 %}s{% endif %}
+              &nbsp;·&nbsp;
+              <strong>{{ p.interessados | length }}</strong> interessado{% if p.interessados | length != 1 %}s{% endif %}
+              {% if p.get('mentores_interessados') %}
+              &nbsp;·&nbsp;
+              <strong>{{ p.mentores_interessados | length }}</strong> mentor{% if p.mentores_interessados | length != 1 %}es{% endif %} candidato{% if p.mentores_interessados | length != 1 %}s{% endif %}
+              {% endif %}
+            </small>
+            <a href="{{ url_for('projetos.detalhe', idx=idx) }}" class="btn btn-sm btn-outline-danger">Gerenciar</a>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="text-center text-muted py-5">
+      <p class="mb-3">Você ainda não criou nenhum projeto.</p>
+      <a href="{{ url_for('projetos.novo_projeto') }}" class="btn btn-danger btn-sm">+ Criar projeto</a>
+    </div>
+    {% endif %}
+  </div>
+
+  {# aba: participando #}
+  <div class="tab-pane fade" id="participando">
+    {% if participando %}
+    <div class="row g-3">
+      {% for idx, p in participando %}
+      {% set vagas = p.numero_vagas - p.participantes | length %}
+      <div class="col-md-6">
+        <div class="card border-0 shadow-sm h-100">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start mb-1">
+              <h6 class="fw-semibold mb-0">{{ p.titulo }}</h6>
+              {% if p.status == 'Em Formação' %}
+                <span class="badge bg-success ms-2 text-nowrap">{{ p.status }}</span>
+              {% else %}
+                <span class="badge bg-secondary ms-2 text-nowrap">{{ p.status }}</span>
+              {% endif %}
+            </div>
+            <p class="text-muted small mb-1">{{ p.resumo_tema }}</p>
+            <small class="text-muted d-block mb-2">
+              por <strong>{{ p.criador_nome }}</strong> ({{ p.criador_tipo }})
+            </small>
+            {% if p.get('mentor_responsavel') %}
+            <small class="text-muted d-block mb-2">
+              Mentor: <strong>{{ p.mentor_responsavel }}</strong>
+            </small>
+            {% endif %}
+            <small class="text-muted d-block mb-3">
+              <strong>{{ p.participantes | length }}</strong> de <strong>{{ p.numero_vagas }}</strong> vagas preenchidas
+            </small>
+            <a href="{{ url_for('projetos.detalhe', idx=idx) }}" class="btn btn-sm btn-outline-secondary">Ver detalhes</a>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="text-center text-muted py-5">
+      <p class="mb-3">Você ainda não participa de nenhum projeto.</p>
+      <a href="{{ url_for('projetos.mural') }}" class="btn btn-outline-danger btn-sm">Ver mural de projetos</a>
+    </div>
+    {% endif %}
+  </div>
+
+  {# aba: aguardando aprovação #}
+  <div class="tab-pane fade" id="interessado">
+    {% if interessado %}
+    <div class="row g-3">
+      {% for idx, p in interessado %}
+      <div class="col-md-6">
+        <div class="card border-0 shadow-sm h-100">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start mb-1">
+              <h6 class="fw-semibold mb-0">{{ p.titulo }}</h6>
+              <span class="badge bg-warning text-dark ms-2 text-nowrap">Aguardando</span>
+            </div>
+            <p class="text-muted small mb-1">{{ p.resumo_tema }}</p>
+            <small class="text-muted d-block mb-3">
+              por <strong>{{ p.criador_nome }}</strong> ({{ p.criador_tipo }})
+            </small>
+            <a href="{{ url_for('projetos.detalhe', idx=idx) }}" class="btn btn-sm btn-outline-secondary">Ver detalhes</a>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="text-center text-muted py-5">
+      <p class="mb-3">Nenhum interesse pendente de aprovação.</p>
+      <a href="{{ url_for('projetos.mural') }}" class="btn btn-outline-danger btn-sm">Explorar projetos</a>
+    </div>
+    {% endif %}
+  </div>
+
+</div>
+
+{% endblock %}
