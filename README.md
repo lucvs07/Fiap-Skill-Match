@@ -164,7 +164,7 @@ Fiap-Skill-Match/
 | RNF01 | Usabilidade: navegação web intuitiva com navbar, breadcrumbs e menus contextuais | ✅ Implementado |
 | RNF02 | Portabilidade: Flask roda em Windows, Linux e macOS com Python instalado | ✅ Implementado |
 | RNF03 | Persistência local: dados salvos em arquivos JSON sem perda ao reiniciar | ✅ Implementado |
-| RNF04 | Validação de entradas: campos obrigatórios, vagas > 0, duplicatas bloqueadas | 🚧 Parcial |
+| RNF04 | Validação de entradas: campos obrigatórios, vagas > 0, duplicatas bloqueadas | ✅ Implementado |
 | RNF05 | Responsividade mobile-first: layout Bootstrap 5 adaptável a qualquer resolução | ✅ Implementado |
 
 ## ⭐ Diferencial do Projeto
