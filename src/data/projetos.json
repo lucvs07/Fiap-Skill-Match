@@ -22,5 +22,48 @@
     "status": "Em Formação",
     "data_criacao": null,
     "interessados": []
+  },
+  {
+    "titulo": "Copa 2026",
+    "resumo_tema": "Levantar o Caneco",
+    "numero_vagas": 3,
+    "criador_tipo": "Mentor",
+    "criador_nome": "Endrick",
+    "participantes": [
+      "Neymar Jr"
+    ],
+    "status": "Em Formação",
+    "data_criacao": null,
+    "interessados": [],
+    "vagas_por_papel": [
+      {
+        "papel": "Desenvolver",
+        "stack": "Python",
+        "quantidade": 1
+      }
+    ]
+  },
+  {
+    "titulo": "Champions Jegue",
+    "resumo_tema": "Vamo levantar o caneco ???",
+    "numero_vagas": 3,
+    "criador_tipo": "Mentor",
+    "criador_nome": "Endrick",
+    "participantes": [],
+    "status": "Em Formação",
+    "data_criacao": null,
+    "interessados": [],
+    "vagas_por_papel": [
+      {
+        "papel": "Dev",
+        "stack": "Java",
+        "quantidade": 1
+      },
+      {
+        "papel": "Designer",
+        "stack": "Figma",
+        "quantidade": 1
+      }
+    ]
   }
 ]

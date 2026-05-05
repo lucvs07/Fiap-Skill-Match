@@ -12,5 +12,19 @@
       "Java"
     ],
     "alunos_orientando": []
+  },
+  {
+    "nome": "Endrick",
+    "departamento": "Marketing",
+    "linhas_pesquisa": [
+      "Marketing",
+      "Publicidade"
+    ],
+    "disponibilidade": "Baixa",
+    "email": "ancelloti@gmail.com",
+    "especialidades": [
+      "Figma"
+    ],
+    "alunos_orientando": []
   }
 ]

@@ -9,5 +9,37 @@
       "Python",
       "Java"
     ]
+  },
+  {
+    "nome": "Neymar Jr",
+    "curso": "Engenharia de Computação",
+    "areas_interesse": [
+      "Finanças"
+    ],
+    "habilidades_tecnicas": [
+      "Python",
+      "Java",
+      "Sql"
+    ],
+    "skills": [
+      {
+        "skill": "Java",
+        "nivel": "Avançado"
+      },
+      {
+        "skill": "Python",
+        "nivel": "Básico"
+      },
+      {
+        "skill": "SQL",
+        "nivel": "Intermediário"
+      }
+    ],
+    "links": {
+      "github": "",
+      "linkedin": "",
+      "figma": ""
+    },
+    "status_busca": "aberto"
   }
 ]
