@@ -6,6 +6,7 @@ from src.views.projetos import projetos_bp
 from src.views.mentores import mentores_bp
 from src.views.perfil import perfil_bp
 from src.views.alunos import alunos_bp
+from src.models.convite import carregar_convites
 
 
 def create_app():
@@ -19,6 +20,19 @@ def create_app():
     app.register_blueprint(mentores_bp)
     app.register_blueprint(perfil_bp)
     app.register_blueprint(alunos_bp)
+
+    @app.context_processor
+    def inject_convites_pendentes():
+        nome = session.get('nome')
+        tipo = session.get('tipo')
+        if nome and tipo in ('aluno', 'mentor'):
+            pendentes = sum(
+                1 for c in carregar_convites()
+                if c['destinatario'] == nome and c['status'] == 'pendente'
+            )
+        else:
+            pendentes = 0
+        return {'convites_pendentes': pendentes}
 
     @app.route('/')
     def index():

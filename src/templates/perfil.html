@@ -103,6 +103,13 @@
       </div>
     </div>
 
+    <a href="{{ url_for('perfil.meus_projetos') }}" class="btn btn-outline-danger w-100 mb-2">Meus Projetos</a>
+    <a href="{{ url_for('perfil.convites') }}" class="btn btn-outline-danger w-100 mb-2 position-relative">
+      Meus Convites
+      {% if convites_pendentes %}
+        <span class="badge bg-danger ms-1">{{ convites_pendentes }}</span>
+      {% endif %}
+    </a>
     <a href="{{ url_for('perfil.editar_perfil') }}" class="btn btn-danger w-100">Editar perfil</a>
   </div>
 </div>

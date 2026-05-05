@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="d-flex align-items-center mb-4">
+  <a href="{{ url_for('perfil.perfil_mentor') }}" class="btn btn-sm btn-outline-secondary me-3">← Voltar</a>
+  <h2 class="mb-0">Minhas Solicitações de Mentoria</h2>
+</div>
+
+{% set pendentes = convites_com_idx | selectattr('1.status', 'equalto', 'pendente') | list %}
+{% set respondidos = convites_com_idx | rejectattr('1.status', 'equalto', 'pendente') | list %}
+
+{% if not convites_com_idx %}
+  <div class="text-center text-muted py-5">
+    <p class="mb-0">Você ainda não recebeu nenhuma solicitação de mentoria.</p>
+  </div>
+{% else %}
+
+  {% if pendentes %}
+  <h5 class="mb-3">Pendentes <span class="badge bg-warning text-dark">{{ pendentes | length }}</span></h5>
+  <div class="row g-3 mb-5">
+    {% for idx, c in pendentes %}
+    <div class="col-md-6">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-start mb-2">
+            <h6 class="fw-semibold mb-0">{{ c.projeto_titulo }}</h6>
+            <span class="badge bg-warning text-dark">Pendente</span>
+          </div>
+          <p class="text-muted small mb-3">
+            Solicitação enviada por <strong>{{ c.remetente }}</strong>
+            em {{ c.data[:10] }}
+          </p>
+          <div class="d-flex gap-2">
+            <form method="POST" action="{{ url_for('perfil.aceitar_convite_mentor', idx=idx) }}">
+              <button type="submit" class="btn btn-success btn-sm">Aceitar</button>
+            </form>
+            <form method="POST" action="{{ url_for('perfil.recusar_convite_mentor', idx=idx) }}">
+              <button type="submit" class="btn btn-outline-danger btn-sm">Recusar</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  {% if respondidos %}
+  <h5 class="mb-3 text-muted">Respondidos</h5>
+  <div class="row g-3">
+    {% for idx, c in respondidos %}
+    <div class="col-md-6">
+      <div class="card border-0 shadow-sm h-100 opacity-75">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-start mb-2">
+            <h6 class="fw-semibold mb-0">{{ c.projeto_titulo }}</h6>
+            {% if c.status == 'aceito' %}
+              <span class="badge bg-success">Aceito</span>
+            {% else %}
+              <span class="badge bg-secondary">Recusado</span>
+            {% endif %}
+          </div>
+          <p class="text-muted small mb-0">
+            Solicitação de <strong>{{ c.remetente }}</strong>
+            em {{ c.data[:10] }}
+          </p>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+{% endif %}
+
+{% endblock %}

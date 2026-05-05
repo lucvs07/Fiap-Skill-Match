@@ -7,20 +7,9 @@ from src.models.convite import Convite, carregar_convites, salvar_convites
 alunos_bp = Blueprint('alunos', __name__)
 
 
-def _pode_buscar():
-    if session.get('tipo') == 'mentor':
-        return True
-    nome = session.get('nome')
-    return any(p.get('criador_nome') == nome for p in carregar_projetos())
-
-
 @alunos_bp.route('/alunos')
 @login_required
 def busca_alunos():
-    if not _pode_buscar():
-        flash('Acesso restrito a mentores e criadores de projetos.', 'warning')
-        return redirect(url_for('dashboard.dashboard'))
-
     skill_filtro = request.args.get('skill', '').strip().lower()
     nivel_filtro = request.args.get('nivel', '').strip()
     curso_filtro = request.args.get('curso', '').strip().lower()
@@ -53,10 +42,6 @@ def busca_alunos():
 @alunos_bp.route('/alunos/<int:idx>')
 @login_required
 def perfil_publico(idx):
-    if not _pode_buscar():
-        flash('Acesso restrito a mentores e criadores de projetos.', 'warning')
-        return redirect(url_for('dashboard.dashboard'))
-
     alunos = [a for a in carregar_alunos() if a.get('status_busca', 'fechado') == 'aberto']
     if idx < 0 or idx >= len(alunos):
         flash('Aluno não encontrado.', 'danger')
@@ -85,9 +70,11 @@ def perfil_publico(idx):
 @alunos_bp.route('/alunos/<int:idx>/convidar', methods=['POST'])
 @login_required
 def convidar(idx):
-    if not _pode_buscar():
-        flash('Acesso restrito a mentores e criadores de projetos.', 'warning')
-        return redirect(url_for('dashboard.dashboard'))
+    nome = session.get('nome')
+    tem_projeto = any(p.get('criador_nome') == nome for p in carregar_projetos())
+    if not tem_projeto:
+        flash('Apenas criadores de projetos podem enviar convites.', 'warning')
+        return redirect(url_for('alunos.perfil_publico', idx=idx))
 
     alunos = [a for a in carregar_alunos() if a.get('status_busca', 'fechado') == 'aberto']
     if idx < 0 or idx >= len(alunos):
@@ -96,7 +83,6 @@ def convidar(idx):
 
     aluno = alunos[idx]
     projeto_titulo = request.form.get('projeto_titulo', '').strip()
-    nome = session.get('nome')
 
     meus_projetos_titulos = {
         p['titulo'] for p in carregar_projetos() if p.get('criador_nome') == nome
