@@ -1,5 +1,9 @@
 # 🎓 Fiap Skill Match
 
+<!-- portfolio:pt -->
+Plataforma web que conecta alunos e mentores da FIAP para formar squads de Iniciação Científica, com vagas por papel, convites, pedidos de mentoria e busca por skills. Flask e Bootstrap.
+<!-- /portfolio:pt -->
+
 ## 📌 Descrição do Problema
 
 A formação de squads para projetos de Iniciação Científica (IC) na FIAP é um processo informal e fragmentado. Alunos têm dificuldade em encontrar colegas com as habilidades certas para compor seu time, mentores não têm visibilidade sobre quem está disponível, e os projetos acabam sendo formados por contatos pessoais — excluindo talentos que simplesmente não estavam na rede certa.
